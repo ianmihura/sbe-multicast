@@ -30,15 +30,14 @@ func PingUDP(addr_ string) {
 		log.Fatal(err)
 	}
 
-	i := 0
+	var i int32 = 0
 	for {
 		nBytes, err := conn.Write([]byte(string(i)))
 		if err != nil {
 			log.Fatal(err)
-		} else {
-			log.Println(nBytes, "sent to addr", addr)
 		}
 
+		log.Println(nBytes, "sent to addr", addr)
 		time.Sleep(time.Second)
 		i += 1
 	}

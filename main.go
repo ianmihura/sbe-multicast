@@ -5,7 +5,7 @@ const MC_PORT = "9999" // TODO open this port in local
 
 func main() {
 	addr := MC_GROUP + ":" + MC_PORT
-	file := "./rfq.pcapng"
+	file := "./pcaps/rfq.pcapng"
 
 	// go PingUDP(addr)
 	go ReplayUDP(file, addr)
