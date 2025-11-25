@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"log"
 	"net"
 
@@ -9,9 +10,17 @@ import (
 )
 
 func Parser(src *net.UDPAddr, nBytes int, buff []byte) {
-	// TODO parse payload
+	log.Println(nBytes, "received from addr", src)
+	log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
 
-	// TODO smaller reader to make it more efficient
+	obj := sbeParser(buff)
+	obj.PPrint(0)
+}
+
+func sbeParser(buff []byte) deribit_multicast.SbeStdMessage {
+	// TODO increase buffer size of SbeMarshalling for parsing (excluding variable length)
+
+	// TODO reader smaller : more efficient
 	r := bytes.NewReader(buff)
 
 	// TODO make struct for this fucking thing
@@ -43,8 +52,5 @@ func Parser(src *net.UDPAddr, nBytes int, buff []byte) {
 	}
 	log.Println(">>>> DECODED : RFQ", rfq)
 
-	// TODO increase buffer size of SbeMarshalling for parsing (excluding variable length)
-
-	// log.Println(nBytes, "received from addr", src)
-	// log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
+	return &rfq
 }
