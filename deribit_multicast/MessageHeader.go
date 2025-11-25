@@ -34,7 +34,6 @@ func (h *MessageHeader) getTemplateName() string {
 	default:
 		return "unknown"
 	}
-
 }
 
 func (m *MessageHeader) Encode(_m *SbeGoMarshaller, _w io.Writer) error {

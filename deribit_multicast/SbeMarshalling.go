@@ -43,24 +43,20 @@ func NewSbeGoMarshaller() *SbeGoMarshaller {
 }
 
 type SbeStdMessage interface {
-	Decode(*SbeGoMarshaller, io.Reader, uint16, uint16, bool) error
-	Encode(*SbeGoMarshaller, io.Writer, bool) error
-	RangeCheck(uint16, uint16) error
+	Decode(s *SbeGoMarshaller, r io.Reader, actingVersion uint16, blockLength uint16, doRangeCheck bool) error
+	Encode(s *SbeGoMarshaller, w io.Writer, doRangeCheck bool) error
+	RangeCheck(actingVersion uint16, schemaVersion uint16) error
 	PPrint(indent int)
 }
 
 func PPrintlnInd(indent int, args ...any) {
-	is := PrintingIndent(indent)
-	fmt.Print(is)
-	fmt.Println(args...)
-}
-
-func PrintingIndent(i int) string {
 	is := ""
-	for range i {
+	for range indent {
 		is += " "
 	}
-	return is
+
+	fmt.Print(is)
+	fmt.Println(args...)
 }
 
 // The "standard" MessageHeader.

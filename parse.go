@@ -13,26 +13,25 @@ func Parser(src *net.UDPAddr, nBytes int, buff []byte) {
 	log.Println(nBytes, "received from addr", src)
 	log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
 
-	obj := sbeParser(buff)
+	obj := sbeParser(buff, true)
 	obj.PPrint(0)
 }
 
-func sbeParser(buff []byte) deribit_multicast.SbeStdMessage {
+func sbeParser(buff []byte, doPrintFrameHeader bool) deribit_multicast.SbeStdMessage {
 	// TODO increase buffer size of SbeMarshalling for parsing (excluding variable length)
 
 	// TODO reader smaller : more efficient
 	r := bytes.NewReader(buff)
-
-	// TODO make struct for this fucking thing
-	var pkgLen uint16
-	var chanID uint16
-	var seqNum uint32
 	sbe_m := deribit_multicast.NewSbeGoMarshaller()
-	sbe_m.ReadUint16(r, &pkgLen)
-	sbe_m.ReadUint16(r, &chanID)
-	sbe_m.ReadUint32(r, &seqNum)
 
-	log.Println(">>>> DECODED : FIX header", pkgLen, chanID, seqNum)
+	frame := deribit_multicast.FrameHeader{}
+	err := frame.Decode(sbe_m, r, 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if doPrintFrameHeader {
+		frame.PPrint(0)
+	}
 
 	// TODO refactor header outside of packet
 	// TODO switch on message type, will be in the header
@@ -46,11 +45,11 @@ func sbeParser(buff []byte) deribit_multicast.SbeStdMessage {
 
 	rfq := deribit_multicast.Rfq{}
 	// rfq decodes its own header
-	err := rfq.Decode(sbe_m, r, 1, 22, true) // TODO version && len before reading?
+	err = rfq.Decode(sbe_m, r, 1, frame.PacketLength, true) // TODO version before reading?
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(">>>> DECODED : RFQ", rfq)
+	// log.Println(">>>> DECODED : RFQ", rfq)
 
 	return &rfq
 }

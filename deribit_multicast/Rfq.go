@@ -25,7 +25,7 @@ func (r *Rfq) PPrint(i int) {
 	PPrintlnInd(i+2, "State:", r.State.GetPPrint())
 	PPrintlnInd(i+2, "Side:", r.Side.GetPPrint())
 	PPrintlnInd(i+2, "Amount:", r.Amount)
-	PPrintlnInd(i+2, "TimestampMS:", time.Unix(int64(r.TimestampMs), 0))
+	PPrintlnInd(i+2, "TimestampMS:", time.UnixMilli(int64(r.TimestampMs)))
 }
 
 func (r *Rfq) Encode(_m *SbeGoMarshaller, _w io.Writer, doRangeCheck bool) error {
