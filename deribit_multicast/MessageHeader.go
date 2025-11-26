@@ -6,7 +6,16 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strconv"
 )
+
+type UnknownTemplateIdError uint16
+type NotImplementedTemplateIdError uint16
+
+func (e UnknownTemplateIdError) Error() string { return "unknown template id " + strconv.Itoa(int(e)) }
+func (e NotImplementedTemplateIdError) Error() string {
+	return "not implemented for template id " + strconv.Itoa(int(e))
+}
 
 type MessageHeader struct {
 	BlockLength      uint16
@@ -27,10 +36,61 @@ func (h *MessageHeader) PPrint(i int) {
 	PPrintlnInd(i+2, "NumVarDataFields:", h.NumVarDataFields)
 }
 
+func (h *MessageHeader) GetConcreteMessage() (SbeStdMessage, error) {
+	switch h.TemplateId {
+	case 1000:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1001:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1002:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1003:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1004:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1005:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1006:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1007:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1008:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	case 1009:
+		obj := &Rfq{}
+		obj.Header = *h
+		return obj, nil
+	case 1010:
+		return nil, NotImplementedTemplateIdError(h.TemplateId)
+	default:
+		return nil, UnknownTemplateIdError(h.TemplateId)
+	}
+}
+
 func (h *MessageHeader) getTemplateName() string {
 	switch h.TemplateId {
+	case 1000:
+		return "instrument (1000)"
+	case 1001:
+		return "book (1001)"
+	case 1002:
+		return "trades (1002)"
+	case 1003:
+		return "ticker (1003)"
+	case 1004:
+		return "snapshot (1004)"
+	case 1005:
+		return "snapshot_start (1005)"
+	case 1006:
+		return "snapshot_end (1006)"
+	case 1007:
+		return "combo_legs (1007)"
+	case 1008:
+		return "price_index (1008)"
 	case 1009:
-		return "RFQ (1009)"
+		return "rfq (1009)"
+	case 1010:
+		return "instrument_v2 (1010)"
 	default:
 		return "unknown"
 	}
@@ -58,48 +118,24 @@ func (m *MessageHeader) Encode(_m *SbeGoMarshaller, _w io.Writer) error {
 	return nil
 }
 
-func (m *MessageHeader) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16) error {
-	if !m.BlockLengthInActingVersion(actingVersion) {
-		m.BlockLength = m.BlockLengthNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.BlockLength); err != nil {
-			return err
-		}
+func (m *MessageHeader) Decode(_m *SbeGoMarshaller, _r io.Reader) error {
+	if err := _m.ReadUint16(_r, &m.BlockLength); err != nil {
+		return err
 	}
-	if !m.TemplateIdInActingVersion(actingVersion) {
-		m.TemplateId = m.TemplateIdNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.TemplateId); err != nil {
-			return err
-		}
+	if err := _m.ReadUint16(_r, &m.TemplateId); err != nil {
+		return err
 	}
-	if !m.SchemaIdInActingVersion(actingVersion) {
-		m.SchemaId = m.SchemaIdNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.SchemaId); err != nil {
-			return err
-		}
+	if err := _m.ReadUint16(_r, &m.SchemaId); err != nil {
+		return err
 	}
-	if !m.VersionInActingVersion(actingVersion) {
-		m.Version = m.VersionNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.Version); err != nil {
-			return err
-		}
+	if err := _m.ReadUint16(_r, &m.Version); err != nil {
+		return err
 	}
-	if !m.NumGroupsInActingVersion(actingVersion) {
-		m.NumGroups = m.NumGroupsNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.NumGroups); err != nil {
-			return err
-		}
+	if err := _m.ReadUint16(_r, &m.NumGroups); err != nil {
+		return err
 	}
-	if !m.NumVarDataFieldsInActingVersion(actingVersion) {
-		m.NumVarDataFields = m.NumVarDataFieldsNullValue()
-	} else {
-		if err := _m.ReadUint16(_r, &m.NumVarDataFields); err != nil {
-			return err
-		}
+	if err := _m.ReadUint16(_r, &m.NumVarDataFields); err != nil {
+		return err
 	}
 	return nil
 }

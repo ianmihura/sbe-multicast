@@ -34,7 +34,7 @@ func (m *FrameHeader) Encode(_m *SbeGoMarshaller, _w io.Writer) error {
 	return nil
 }
 
-func (m *FrameHeader) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16) error {
+func (m *FrameHeader) Decode(_m *SbeGoMarshaller, _r io.Reader) error {
 	if _, err := io.ReadFull(_r, _m.b8); err != nil {
 		return err
 	}

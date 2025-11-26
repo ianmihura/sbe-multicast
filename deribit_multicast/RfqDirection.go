@@ -61,39 +61,3 @@ func (r RfqDirectionEnum) RangeCheck(actingVersion uint16, schemaVersion uint16)
 func (*RfqDirectionEnum) EncodedLength() int64 {
 	return 1
 }
-
-func (*RfqDirectionEnum) buySinceVersion() uint16 {
-	return 0
-}
-
-func (r *RfqDirectionEnum) buyInActingVersion(actingVersion uint16) bool {
-	return actingVersion >= r.buySinceVersion()
-}
-
-func (*RfqDirectionEnum) buyDeprecated() uint16 {
-	return 0
-}
-
-func (*RfqDirectionEnum) sellSinceVersion() uint16 {
-	return 0
-}
-
-func (r *RfqDirectionEnum) sellInActingVersion(actingVersion uint16) bool {
-	return actingVersion >= r.sellSinceVersion()
-}
-
-func (*RfqDirectionEnum) sellDeprecated() uint16 {
-	return 0
-}
-
-func (*RfqDirectionEnum) no_directionSinceVersion() uint16 {
-	return 0
-}
-
-func (r *RfqDirectionEnum) no_directionInActingVersion(actingVersion uint16) bool {
-	return actingVersion >= r.no_directionSinceVersion()
-}
-
-func (*RfqDirectionEnum) no_directionDeprecated() uint16 {
-	return 0
-}

@@ -27,6 +27,7 @@ import (
 
 // Allocate via NewSbeGoMarshaller to initialize
 type SbeGoMarshaller struct {
+	// TODO increase buffer size of SbeMarshalling for parsing (excluding variable length)
 	b8 []byte // statically allocated tmp space to avoid alloc
 	b1 []byte // previously created slice into b to save time
 	b2 []byte // previously created slice into b to save time
@@ -45,8 +46,13 @@ func NewSbeGoMarshaller() *SbeGoMarshaller {
 type SbeStdMessage interface {
 	Decode(s *SbeGoMarshaller, r io.Reader, actingVersion uint16, blockLength uint16, doRangeCheck bool) error
 	Encode(s *SbeGoMarshaller, w io.Writer, doRangeCheck bool) error
-	RangeCheck(actingVersion uint16, schemaVersion uint16) error
 	PPrint(indent int)
+}
+
+type SbeStdEnum interface {
+	Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16) error
+	Encode(_m *SbeGoMarshaller, _w io.Writer) error
+	GetPPrint() string
 }
 
 func PPrintlnInd(indent int, args ...any) {

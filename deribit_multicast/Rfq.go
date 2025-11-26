@@ -22,21 +22,13 @@ func (r *Rfq) PPrint(i int) {
 	PPrintlnInd(i, "Object: RFQ")
 	r.Header.PPrint(i + 2)
 	PPrintlnInd(i+2, "InstrumentId:", r.InstrumentId)
-	PPrintlnInd(i+2, "State:", r.State.GetPPrint())
+	PPrintlnInd(i+2, "State:", r.State.GetPPrint()) // TODO print nicer state message
 	PPrintlnInd(i+2, "Side:", r.Side.GetPPrint())
 	PPrintlnInd(i+2, "Amount:", r.Amount)
 	PPrintlnInd(i+2, "TimestampMS:", time.UnixMilli(int64(r.TimestampMs)))
 }
 
 func (r *Rfq) Encode(_m *SbeGoMarshaller, _w io.Writer, doRangeCheck bool) error {
-	if doRangeCheck {
-		if err := r.RangeCheck(r.SbeSchemaVersion(), r.SbeSchemaVersion()); err != nil {
-			return err
-		}
-	}
-	if err := r.Header.Encode(_m, _w); err != nil {
-		return err
-	}
 	if err := _m.WriteUint32(_w, r.InstrumentId); err != nil {
 		return err
 	}
@@ -56,49 +48,20 @@ func (r *Rfq) Encode(_m *SbeGoMarshaller, _w io.Writer, doRangeCheck bool) error
 }
 
 func (r *Rfq) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16, blockLength uint16, doRangeCheck bool) error {
-	if r.HeaderInActingVersion(actingVersion) {
-		if err := r.Header.Decode(_m, _r, actingVersion); err != nil {
-			return err
-		}
+	if err := _m.ReadUint32(_r, &r.InstrumentId); err != nil {
+		return err
 	}
-	if !r.InstrumentIdInActingVersion(actingVersion) {
-		r.InstrumentId = r.InstrumentIdNullValue()
-	} else {
-		if err := _m.ReadUint32(_r, &r.InstrumentId); err != nil {
-			return err
-		}
+	if err := r.State.Decode(_m, _r, actingVersion); err != nil {
+		return err
 	}
-	if r.StateInActingVersion(actingVersion) {
-		if err := r.State.Decode(_m, _r, actingVersion); err != nil {
-			return err
-		}
+	if err := r.Side.Decode(_m, _r, actingVersion); err != nil {
+		return err
 	}
-	if r.SideInActingVersion(actingVersion) {
-		if err := r.Side.Decode(_m, _r, actingVersion); err != nil {
-			return err
-		}
+	if err := _m.ReadFloat64(_r, &r.Amount); err != nil {
+		return err
 	}
-	if !r.AmountInActingVersion(actingVersion) {
-		r.Amount = r.AmountNullValue()
-	} else {
-		if err := _m.ReadFloat64(_r, &r.Amount); err != nil {
-			return err
-		}
-	}
-	if !r.TimestampMsInActingVersion(actingVersion) {
-		r.TimestampMs = r.TimestampMsNullValue()
-	} else {
-		if err := _m.ReadUint64(_r, &r.TimestampMs); err != nil {
-			return err
-		}
-	}
-	if actingVersion > r.SbeSchemaVersion() && blockLength > r.SbeBlockLength() {
-		io.CopyN(io.Discard, _r, int64(blockLength-r.SbeBlockLength()))
-	}
-	if doRangeCheck {
-		if err := r.RangeCheck(actingVersion, r.SbeSchemaVersion()); err != nil {
-			return err
-		}
+	if err := _m.ReadUint64(_r, &r.TimestampMs); err != nil {
+		return err
 	}
 	return nil
 }

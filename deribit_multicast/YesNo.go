@@ -17,12 +17,12 @@ type YesNoValues struct {
 
 var YesNo = YesNoValues{0, 1, 255}
 
-func (yn *YesNoEnum) GetPPrint() string {
-	switch *yn {
-	case YesNo.Yes:
-		return "yes"
+func (y *YesNoEnum) GetPPrint() string {
+	switch *y {
 	case YesNo.No:
 		return "no"
+	case YesNo.Yes:
+		return "yes"
 	default:
 		return "null"
 	}
@@ -53,32 +53,4 @@ func (y YesNoEnum) RangeCheck(actingVersion uint16, schemaVersion uint16) error 
 		}
 	}
 	return fmt.Errorf("range check failed on YesNo, unknown enumeration value %d", y)
-}
-
-func (*YesNoEnum) EncodedLength() int64 {
-	return 1
-}
-
-func (*YesNoEnum) noSinceVersion() uint16 {
-	return 0
-}
-
-func (y *YesNoEnum) noInActingVersion(actingVersion uint16) bool {
-	return actingVersion >= y.noSinceVersion()
-}
-
-func (*YesNoEnum) noDeprecated() uint16 {
-	return 0
-}
-
-func (*YesNoEnum) yesSinceVersion() uint16 {
-	return 0
-}
-
-func (y *YesNoEnum) yesInActingVersion(actingVersion uint16) bool {
-	return actingVersion >= y.yesSinceVersion()
-}
-
-func (*YesNoEnum) yesDeprecated() uint16 {
-	return 0
 }
