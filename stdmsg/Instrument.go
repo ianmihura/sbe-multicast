@@ -28,7 +28,7 @@ type InstrumentV2 struct {
 	MaxLiquidationCommission float64
 	MaxLeverage              float64
 	TickStepsList            []InstrumentV2TickStepsList // TODO make
-	InstrumentName           []uint8
+	InstrumentName           VarString
 }
 
 type InstrumentV2TickStepsList struct {
@@ -62,7 +62,7 @@ type Instrument struct {
 	BlockTradeCommission     float64
 	MaxLiquidationCommission float64
 	MaxLeverage              float64
-	InstrumentName           []uint8
+	InstrumentName           VarString
 }
 
 func (m *InstrumentV2) PPrint(i int) {
@@ -92,7 +92,7 @@ func (m *InstrumentV2) PPrint(i int) {
 	PPrintlnInd(i+2, "MaxLiquidationCommission:", m.MaxLiquidationCommission)
 	PPrintlnInd(i+2, "MaxLeverage:", m.MaxLeverage)
 	// TODO TickStepsList
-	PPrintlnInd(i+2, "InstrumentName:", m.InstrumentName)
+	m.InstrumentName.PPrintCustom(i+2, "InstrumentName:")
 }
 
 func (m *Instrument) PPrint(i int) {
@@ -122,7 +122,7 @@ func (m *Instrument) PPrint(i int) {
 	PPrintlnInd(i+2, "BlockTradeCommission:", m.BlockTradeCommission)
 	PPrintlnInd(i+2, "MaxLiquidationCommission:", m.MaxLiquidationCommission)
 	PPrintlnInd(i+2, "MaxLeverage:", m.MaxLeverage)
-	PPrintlnInd(i+2, "InstrumentName:", m.InstrumentName)
+	m.InstrumentName.PPrintCustom(i+2, "InstrumentName:")
 }
 
 func (m *InstrumentV2) Decode(c *Coder) {
@@ -150,7 +150,7 @@ func (m *InstrumentV2) Decode(c *Coder) {
 	c.Decode(&m.MaxLiquidationCommission)
 	c.Decode(&m.MaxLeverage)
 	// TODO TickStepsList
-	c.Decode(&m.InstrumentName) // TODO decode var length
+	m.InstrumentName.Decode(c)
 }
 
 func (m *Instrument) Decode(c *Coder) {
@@ -178,7 +178,7 @@ func (m *Instrument) Decode(c *Coder) {
 	c.Decode(&m.BlockTradeCommission)
 	c.Decode(&m.MaxLiquidationCommission)
 	c.Decode(&m.MaxLeverage)
-	c.Decode(&m.InstrumentName) // TODO decode var length
+	m.InstrumentName.Decode(c)
 }
 
 type InstrumentStateEnum uint8
