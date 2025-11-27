@@ -8,7 +8,7 @@ type Rfq struct {
 	Header       MessageHeader
 	InstrumentId uint32
 	State        YesNoEnum
-	Side         RfqDirectionEnum
+	Side         DirectionEnum
 	Amount       float64
 	TimestampMs  uint64
 }
@@ -29,31 +29,4 @@ func (m *Rfq) Decode(c *Coder) {
 	c.Decode(&m.Side)
 	c.Decode(&m.Amount)
 	c.Decode(&m.TimestampMs)
-}
-
-type RfqDirectionEnum uint8
-type RfqDirectionValues struct {
-	Buy          RfqDirectionEnum
-	Sell         RfqDirectionEnum
-	No_direction RfqDirectionEnum
-	NullValue    RfqDirectionEnum
-}
-
-var RfqDirection = RfqDirectionValues{0, 1, 2, 255}
-
-func (m *RfqDirectionEnum) PPrint(i int) {
-	switch *m {
-	case RfqDirection.Buy:
-		PPrintlnInd(i, "Side: buy")
-	case RfqDirection.Sell:
-		PPrintlnInd(i, "Side: sell")
-	case RfqDirection.No_direction:
-		PPrintlnInd(i, "Side: no direction")
-	default:
-		PPrintlnInd(i, "Side: null")
-	}
-}
-
-func (m *RfqDirectionEnum) Decode(c *Coder) {
-	c.Decode(m)
 }
