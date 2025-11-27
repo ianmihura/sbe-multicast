@@ -1,15 +1,59 @@
 package main
 
-const MC_GROUP = "239.111.111.1"
-const MC_PORT = "9999" // TODO open this port in local
+import (
+	"log"
+	"os"
+	"runtime"
+	"time"
+
+	"github.com/ianmihura/sbe-multicast/stdmsg"
+)
+
+const _8KB = 8192
+const _64KB = 65_536
+
+const MC_GROUP = "239.222.222.2"
+const MC_PORT = "6200"
+const FILE = "./pcaps/rfq.pcapng"
+const DATA_CHAN_CAP = 100 // TODO optimize this
 
 func main() {
-	addr := MC_GROUP + ":" + MC_PORT
-	file := "./pcaps/rfq.pcapng"
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	nProc := runtime.NumCPU()
+	runtime.GOMAXPROCS(nProc)
 
-	// go PingUDP(addr)
-	go ReplayUDP(file, addr)
-	ListenUDP(addr, Parser)
+	addr := MC_GROUP + ":" + MC_PORT
+
+	// Using single thread we can parse each packet right after reception
+	// ListenUDPSingle(addr, ParseSingle)
+	// Otherwise we spinup a single fast UDP listener that delegates
+	//   parsing to parser workers
+
+	// dataCh will grab incoming packets from socket
+	//   and carry each packet (message) from Listener to Parser,
+	dataCh := make(chan []byte, DATA_CHAN_CAP)
+	go ListenUDPFast(addr, dataCh, true)
+
+	// syncCh will grab finished work of each worker
+	//   and send it to be executed in-line
+	syncCh := make(chan *stdmsg.StdMessage, nProc*2) // TODO is nProc*2 enough?
+
+	// We spinup n workers (as NumCPU)
+	for range nProc {
+		go ParseWorker(dataCh, syncCh)
+	}
+
+	// Sync up the work as we receive it
+	go SyncWorkers(syncCh)
+
+	// Replay packets
+	time.Sleep(time.Second) // sleep 1sec to allow listener & workers to spinup
+	go ReplayUDP(FILE, addr)
+
+	// Keep app alive
+	c := make(chan os.Signal, 1)
+	s := <-c
+	log.Printf("Received signal '%v', halting program\n", s)
 }
 
 // https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1

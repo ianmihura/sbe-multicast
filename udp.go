@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"log"
 	"net"
 	"sync"
@@ -9,14 +10,6 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 )
-
-const _8KB = 8192
-
-var pool = sync.Pool{
-	New: func() any {
-		return make([]byte, _8KB)
-	},
-}
 
 // Pings an number (even increasing) to a udp addr
 func PingUDP(addr_ string) {
@@ -44,7 +37,7 @@ func PingUDP(addr_ string) {
 }
 
 // Listens for incoming multicast messages from an addr, uses handler_ callback
-func ListenUDP(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
+func ListenUDPSingle(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 	addr, err := net.ResolveUDPAddr("udp", addr_)
 	if err != nil {
 		log.Fatal(err)
@@ -60,12 +53,8 @@ func ListenUDP(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 		log.Fatal(err)
 	}
 
-	conn.SetReadBuffer(_8KB)
-
-	// more efficient for concurrecny, but we'll prob not use it here
-	// buff := pool.Get().([]byte)
-	// defer pool.Put(&buff)
-	buff := make([]byte, _8KB)
+	conn.SetReadBuffer(_64KB)
+	buff := make([]byte, _64KB)
 
 	log.Println("Listening on", if_addr, "from", addr)
 	for {
@@ -74,7 +63,52 @@ func ListenUDP(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 			log.Fatal("ReadFromUDP failed:", err)
 		}
 
+		log.Println(nBytes, "received from addr", src)
+		log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
+
 		handler_(src, nBytes, buff)
+	}
+}
+
+var buffPool = sync.Pool{
+	New: func() any {
+		return make([]byte, _8KB) // TODO check max msg size
+	},
+}
+
+// Listens for incoming multicast messages from an addr, sends messages via dataCh
+func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
+	addr, err := net.ResolveUDPAddr("udp", addr_)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if_addr, err := net.InterfaceByName("wlan0")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conn, err := net.ListenMulticastUDP("udp", if_addr, addr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO measure biggest message size
+	conn.SetReadBuffer(_64KB)
+
+	log.Println("Listening on", if_addr, "from", addr)
+	for {
+		buff := buffPool.Get().([]byte)
+
+		nBytes, src, err := conn.ReadFromUDP(buff)
+		if err != nil {
+			log.Fatal("ReadFromUDP failed:", err)
+		} else if isLogging {
+			log.Println(nBytes, "received from addr", src)
+			log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
+		}
+
+		dataCh <- buff[:nBytes]
 	}
 }
 
@@ -102,6 +136,7 @@ func ReplayUDP(file string, addr_ string) {
 	}
 	defer conn.Close()
 
+	log.Println("Sending on", addr_)
 	// for {
 	for _, packet := range packets {
 		// time.Sleep(time.Second)
