@@ -72,7 +72,8 @@ func ListenUDPSingle(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 
 var buffPool = sync.Pool{
 	New: func() any {
-		return make([]byte, _8KB) // TODO check max msg size
+		buff := make([]byte, _8KB) // TODO check max msg size
+		return &buff
 	},
 }
 
@@ -98,17 +99,17 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
 
 	log.Println("Listening on", if_addr, "from", addr)
 	for {
-		buff := buffPool.Get().([]byte)
+		buff := buffPool.Get().(*[]byte)
 
-		nBytes, src, err := conn.ReadFromUDP(buff)
+		nBytes, src, err := conn.ReadFromUDP(*buff)
 		if err != nil {
 			log.Fatal("ReadFromUDP failed:", err)
 		} else if isLogging {
 			log.Println(nBytes, "received from addr", src)
-			log.Printf("payload dump:\n%s", hex.Dump(buff[:nBytes]))
+			log.Printf("payload dump:\n%s", hex.Dump((*buff)[:nBytes]))
 		}
 
-		dataCh <- buff[:nBytes]
+		dataCh <- (*buff)[:nBytes]
 	}
 }
 
