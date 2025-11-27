@@ -38,19 +38,29 @@ func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 		obj.Header = *m
 		return obj, nil
 	case 1001:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &Book{}
+		obj.Header = *m
+		return obj, nil
 	case 1002:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &Trades{}
+		obj.Header = *m
+		return obj, nil
 	case 1003:
 		obj := &Ticker{}
 		obj.Header = *m
 		return obj, nil
 	case 1004:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &Snapshot{}
+		obj.Header = *m
+		return obj, nil
 	case 1005:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &SnapshotStart{}
+		obj.Header = *m
+		return obj, nil
 	case 1006:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &SnapshotEnd{}
+		obj.Header = *m
+		return obj, nil
 	case 1007:
 		return nil, NotImplementedTemplateIdError(m.TemplateId)
 	case 1008:

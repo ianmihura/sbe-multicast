@@ -74,6 +74,17 @@ func (m *BookSideEnum) PPrint(i int) {
 	}
 }
 
+func (m *BookSideEnum) GetPPrint() string {
+	switch *m {
+	case BookSide.Ask:
+		return "ask"
+	case BookSide.Bid:
+		return "bid"
+	default:
+		return "null"
+	}
+}
+
 type BookChangeEnum uint8
 type BookChangeValues struct {
 	Created   BookChangeEnum

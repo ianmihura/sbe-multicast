@@ -29,9 +29,10 @@ func (m *GroupTradesList) PPrint(i int) {
 	PPrintlnInd(i, "TradesList")
 	PPrintlnInd(i+2, "GroupHeader:")
 	m.GroupHeader.PPrint(i + 4)
-	PPrintlnInd(i+2, "TradeList:")
-	for i := range m.TradeList {
-		m.TradeList[i].PPrint(i + 4)
+	PPrintlnInd(i+2, "Trades:")
+	for i_ := range m.TradeList {
+		PPrintlnInd(i+4, "TradeItem:")
+		m.TradeList[i_].PPrint(i + 4)
 	}
 }
 
@@ -60,7 +61,6 @@ type TradeItem struct {
 }
 
 func (m *TradeItem) PPrint(i int) {
-	PPrintlnInd(i, "Direction:")
 	m.Direction.PPrint(i + 2)
 	PPrintlnInd(i+2, "Price:", m.Price)
 	PPrintlnInd(i+2, "Amount:", m.Amount)

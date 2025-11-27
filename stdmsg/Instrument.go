@@ -335,16 +335,16 @@ func (m *GroupTickStepsList) PPrint(i int) {
 	PPrintlnInd(i+2, "GroupHeader:")
 	m.GroupHeader.PPrint(i + 4)
 	PPrintlnInd(i+2, "TickStepList:")
-	for i := range m.TickSteps {
-		m.TickSteps[i].PPrint(i + 4)
+	for i_ := range m.TickSteps {
+		m.TickSteps[i_].PPrint(i + 4)
 	}
 }
 
 func (m *GroupTickStepsList) Decode(c *Coder) {
 	m.GroupHeader.Decode(c)
 	m.TickSteps = make([]TickStepsItem, m.GroupHeader.NumInGroup)
-	for i := range m.TickSteps {
-		m.TickSteps[i].Decode(c)
+	for i_ := range m.TickSteps {
+		m.TickSteps[i_].Decode(c)
 	}
 }
 
