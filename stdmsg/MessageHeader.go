@@ -34,7 +34,9 @@ func (m *MessageHeader) Decode(c *Coder) {
 func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 	switch m.TemplateId {
 	case 1000:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &Instrument{}
+		obj.Header = *m
+		return obj, nil
 	case 1001:
 		return nil, NotImplementedTemplateIdError(m.TemplateId)
 	case 1002:
@@ -58,7 +60,9 @@ func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 		obj.Header = *m
 		return obj, nil
 	case 1010:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &InstrumentV2{}
+		obj.Header = *m
+		return obj, nil
 	default:
 		return nil, UnknownTemplateIdError(m.TemplateId)
 	}
