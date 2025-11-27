@@ -44,13 +44,13 @@ var Direction = DirectionValues{0, 1, 2, 255}
 func (m *DirectionEnum) PPrint(i int) {
 	switch *m {
 	case Direction.Buy:
-		PPrintlnInd(i, "Side: buy")
+		PPrintlnInd(i, "Direction: buy")
 	case Direction.Sell:
-		PPrintlnInd(i, "Side: sell")
+		PPrintlnInd(i, "Direction: sell")
 	case Direction.No_direction:
-		PPrintlnInd(i, "Side: no direction")
+		PPrintlnInd(i, "Direction: no direction")
 	default:
-		PPrintlnInd(i, "Side: null")
+		PPrintlnInd(i, "Direction: null")
 	}
 }
 
