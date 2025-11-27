@@ -24,6 +24,7 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage) {
 func stdParser(data []byte) stdmsg.StdMessage {
 	c := coderPool.Get().(*stdmsg.Coder)
 	c.SetBuffer(&data)
+	c.ResetOffset()
 	defer coderPool.Put(c)
 
 	// We can return data to dataCh once we finish using Coder

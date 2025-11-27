@@ -24,10 +24,13 @@ func (c *Coder) SetBuffer(buff *[]byte) {
 	c.buff = *buff
 }
 
+func (c *Coder) ResetOffset() {
+	c.off = 0
+}
+
 func (c *Coder) Decode(data any) {
 	n, err := binary.Decode(c.buff[c.off:], c.order, data)
 	if err != nil {
-		// TODO error: buffer too small
 		log.Fatal("error in decode: ", err)
 	}
 	c.off += n
