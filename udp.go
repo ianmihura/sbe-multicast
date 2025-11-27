@@ -15,19 +15,19 @@ import (
 func PingUDP(addr_ string) {
 	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp:", err)
 	}
 
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp:", err)
 	}
 
 	var i int32 = 0
 	for {
 		nBytes, err := conn.Write([]byte(string(i)))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("error in udp:", err)
 		}
 
 		log.Println(nBytes, "sent to addr", addr)
@@ -40,17 +40,17 @@ func PingUDP(addr_ string) {
 func ListenUDPSingle(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 	addr, err := net.ResolveUDPAddr("udp", addr_)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp:", err)
 	}
 
 	if_addr, err := net.InterfaceByName("wlan0")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp:", err)
 	}
 
 	conn, err := net.ListenMulticastUDP("udp", if_addr, addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp:", err)
 	}
 
 	conn.SetReadBuffer(_64KB)
@@ -80,17 +80,17 @@ var buffPool = sync.Pool{
 func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
 	addr, err := net.ResolveUDPAddr("udp", addr_)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp listener:", err)
 	}
 
 	if_addr, err := net.InterfaceByName("wlan0")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp listener:", err)
 	}
 
 	conn, err := net.ListenMulticastUDP("udp", if_addr, addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp: listener", err)
 	}
 
 	// TODO measure biggest message size
@@ -127,12 +127,12 @@ func ReplayUDP(file string, addr_ string) {
 
 	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp replay:", err)
 	}
 
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error in udp replay:", err)
 	}
 	defer conn.Close()
 

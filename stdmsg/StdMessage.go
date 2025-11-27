@@ -12,18 +12,10 @@ type Coder struct {
 	off   int
 }
 
-func NewEmptyCoder() Coder {
-	return Coder{
+func NewEmptyCoder() *Coder {
+	return &Coder{
 		order: binary.LittleEndian,
 		buff:  []byte{},
-		off:   0,
-	}
-}
-
-func NewCoder(buff []byte) Coder {
-	return Coder{
-		order: binary.LittleEndian,
-		buff:  buff,
 		off:   0,
 	}
 }
@@ -35,7 +27,8 @@ func (c *Coder) SetBuffer(buff *[]byte) {
 func (c *Coder) Decode(data any) {
 	n, err := binary.Decode(c.buff[c.off:], c.order, data)
 	if err != nil {
-		log.Fatal(err)
+		// TODO error: buffer too small
+		log.Fatal("error in decode: ", err)
 	}
 	c.off += n
 }

@@ -14,7 +14,7 @@ const _64KB = 65_536
 
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
-const FILE = "./pcaps/rfq.pcapng"
+const FILE = "./pcaps/price_index.pcapng"
 const DATA_CHAN_CAP = 100 // TODO optimize this
 
 func main() {
@@ -57,3 +57,5 @@ func main() {
 }
 
 // https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
+// https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
+// https://blog.cloudflare.com/how-to-receive-a-million-packets/

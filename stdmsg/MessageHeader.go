@@ -50,7 +50,9 @@ func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 	case 1007:
 		return nil, NotImplementedTemplateIdError(m.TemplateId)
 	case 1008:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &PriceIndex{}
+		obj.Header = *m
+		return obj, nil
 	case 1009:
 		obj := &Rfq{}
 		obj.Header = *m

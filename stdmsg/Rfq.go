@@ -27,8 +27,6 @@ func (m *Rfq) Decode(c *Coder) {
 	c.Decode(&m.InstrumentId)
 	c.Decode(&m.State)
 	c.Decode(&m.Side)
-	// m.State.Decode(c)
-	// m.Side.Decode(c)
 	c.Decode(&m.Amount)
 	c.Decode(&m.TimestampMs)
 }
