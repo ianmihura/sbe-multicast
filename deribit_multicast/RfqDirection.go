@@ -38,11 +38,8 @@ func (r RfqDirectionEnum) Encode(_m *SbeGoMarshaller, _w io.Writer) error {
 	return nil
 }
 
-func (r *RfqDirectionEnum) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16) error {
-	if err := _m.ReadUint8(_r, (*uint8)(r)); err != nil {
-		return err
-	}
-	return nil
+func (r *RfqDirectionEnum) Decode(_m *SbeGoMarshaller, _r io.Reader) {
+	*r = RfqDirectionEnum(_m.b[5])
 }
 
 func (r RfqDirectionEnum) RangeCheck(actingVersion uint16, schemaVersion uint16) error {
@@ -56,8 +53,4 @@ func (r RfqDirectionEnum) RangeCheck(actingVersion uint16, schemaVersion uint16)
 		}
 	}
 	return fmt.Errorf("range check failed on RfqDirection, unknown enumeration value %d", r)
-}
-
-func (*RfqDirectionEnum) EncodedLength() int64 {
-	return 1
 }

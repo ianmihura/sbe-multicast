@@ -27,7 +27,7 @@ type MessageHeader struct {
 }
 
 func (h *MessageHeader) PPrint(i int) {
-	PPrintlnInd(i, "Object: Header")
+	PPrintlnInd(i, "Message Header")
 	PPrintlnInd(i+2, "BlockLength:", h.BlockLength)
 	PPrintlnInd(i+2, "TemplateId:", h.getTemplateName())
 	PPrintlnInd(i+2, "SchemaId:", h.SchemaId)
@@ -119,24 +119,15 @@ func (m *MessageHeader) Encode(_m *SbeGoMarshaller, _w io.Writer) error {
 }
 
 func (m *MessageHeader) Decode(_m *SbeGoMarshaller, _r io.Reader) error {
-	if err := _m.ReadUint16(_r, &m.BlockLength); err != nil {
+	if _, err := io.ReadFull(_r, _m.b); err != nil {
 		return err
 	}
-	if err := _m.ReadUint16(_r, &m.TemplateId); err != nil {
-		return err
-	}
-	if err := _m.ReadUint16(_r, &m.SchemaId); err != nil {
-		return err
-	}
-	if err := _m.ReadUint16(_r, &m.Version); err != nil {
-		return err
-	}
-	if err := _m.ReadUint16(_r, &m.NumGroups); err != nil {
-		return err
-	}
-	if err := _m.ReadUint16(_r, &m.NumVarDataFields); err != nil {
-		return err
-	}
+	m.BlockLength = uint16(_m.b[0]) | uint16(_m.b[1])<<8
+	m.TemplateId = uint16(_m.b[2]) | uint16(_m.b[3])<<8
+	m.SchemaId = uint16(_m.b[4]) | uint16(_m.b[5])<<8
+	m.Version = uint16(_m.b[6]) | uint16(_m.b[7])<<8
+	m.NumGroups = uint16(_m.b[8]) | uint16(_m.b[9])<<8
+	m.NumVarDataFields = uint16(_m.b[10]) | uint16(_m.b[11])<<8
 	return nil
 }
 

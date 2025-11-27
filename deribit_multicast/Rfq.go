@@ -19,7 +19,7 @@ type Rfq struct {
 }
 
 func (r *Rfq) PPrint(i int) {
-	PPrintlnInd(i, "Object: RFQ")
+	PPrintlnInd(i, "RFQ")
 	r.Header.PPrint(i + 2)
 	PPrintlnInd(i+2, "InstrumentId:", r.InstrumentId)
 	PPrintlnInd(i+2, "State:", r.State.GetPPrint()) // TODO print nicer state message
@@ -47,22 +47,23 @@ func (r *Rfq) Encode(_m *SbeGoMarshaller, _w io.Writer, doRangeCheck bool) error
 	return nil
 }
 
-func (r *Rfq) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16, blockLength uint16, doRangeCheck bool) error {
-	if err := _m.ReadUint32(_r, &r.InstrumentId); err != nil {
+func (r *Rfq) Decode(m *SbeGoMarshaller, _r io.Reader, actingVersion uint16, blockLength uint16, doRangeCheck bool) error {
+	if _, err := io.ReadFull(_r, m.b); err != nil {
 		return err
 	}
-	if err := r.State.Decode(_m, _r, actingVersion); err != nil {
-		return err
-	}
-	if err := r.Side.Decode(_m, _r, actingVersion); err != nil {
-		return err
-	}
-	if err := _m.ReadFloat64(_r, &r.Amount); err != nil {
-		return err
-	}
-	if err := _m.ReadUint64(_r, &r.TimestampMs); err != nil {
-		return err
-	}
+	r.InstrumentId = (uint32(m.b[0]) | uint32(m.b[1])<<8 |
+		uint32(m.b[2])<<16 | uint32(m.b[3])<<24)
+	r.State.Decode(m, _r)
+	r.Side.Decode(m, _r)
+	r.Amount = math.Float64frombits(uint64(m.b[6]) | uint64(m.b[7])<<8 |
+		uint64(m.b[8])<<16 | uint64(m.b[9])<<24 |
+		uint64(m.b[10])<<32 | uint64(m.b[11])<<40 |
+		uint64(m.b[12])<<48 | uint64(m.b[13])<<56)
+	r.TimestampMs = (uint64(m.b[14]) | uint64(m.b[15])<<8 |
+		uint64(m.b[16])<<16 | uint64(m.b[17])<<24 |
+		uint64(m.b[18])<<32 | uint64(m.b[19])<<40 |
+		uint64(m.b[20])<<48 | uint64(m.b[21])<<56)
+
 	return nil
 }
 

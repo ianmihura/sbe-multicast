@@ -35,11 +35,8 @@ func (y YesNoEnum) Encode(_m *SbeGoMarshaller, _w io.Writer) error {
 	return nil
 }
 
-func (y *YesNoEnum) Decode(_m *SbeGoMarshaller, _r io.Reader, actingVersion uint16) error {
-	if err := _m.ReadUint8(_r, (*uint8)(y)); err != nil {
-		return err
-	}
-	return nil
+func (y *YesNoEnum) Decode(_m *SbeGoMarshaller, _r io.Reader) {
+	*y = YesNoEnum(_m.b[4])
 }
 
 func (y YesNoEnum) RangeCheck(actingVersion uint16, schemaVersion uint16) error {
