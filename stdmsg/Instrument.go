@@ -1,6 +1,9 @@
 package stdmsg
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 type InstrumentV2 struct {
 	Header                   MessageHeader
@@ -27,13 +30,8 @@ type InstrumentV2 struct {
 	BlockTradeCommission     float64
 	MaxLiquidationCommission float64
 	MaxLeverage              float64
-	TickStepsList            []InstrumentV2TickStepsList // TODO make
+	TickStepsList            GroupTickStepsList
 	InstrumentName           VarString
-}
-
-type InstrumentV2TickStepsList struct {
-	AbovePrice float64
-	TickSize   float64
 }
 
 type Instrument struct {
@@ -91,8 +89,9 @@ func (m *InstrumentV2) PPrint(i int) {
 	PPrintlnInd(i+2, "BlockTradeCommission:", m.BlockTradeCommission)
 	PPrintlnInd(i+2, "MaxLiquidationCommission:", m.MaxLiquidationCommission)
 	PPrintlnInd(i+2, "MaxLeverage:", m.MaxLeverage)
-	// TODO TickStepsList
+	m.TickStepsList.PPrint(i + 2)
 	m.InstrumentName.PPrintCustom(i+2, "InstrumentName:")
+	log.Fatal("instrument v2 check it works")
 }
 
 func (m *Instrument) PPrint(i int) {
@@ -324,4 +323,41 @@ func (m *PeriodEnum) PPrint(i int) {
 	default:
 		PPrintlnInd(i, "Period: null")
 	}
+}
+
+type GroupTickStepsList struct {
+	GroupHeader GroupSizeEncoding
+	TickSteps   []TickStepsItem
+}
+
+func (m *GroupTickStepsList) PPrint(i int) {
+	PPrintlnInd(i, "TickStepsList")
+	PPrintlnInd(i+2, "GroupHeader:")
+	m.GroupHeader.PPrint(i + 4)
+	PPrintlnInd(i+2, "TickStepList:")
+	for i := range m.TickSteps {
+		m.TickSteps[i].PPrint(i + 4)
+	}
+}
+
+func (m *GroupTickStepsList) Decode(c *Coder) {
+	m.GroupHeader.Decode(c)
+	m.TickSteps = make([]TickStepsItem, m.GroupHeader.NumInGroup)
+	for i := range m.TickSteps {
+		m.TickSteps[i].Decode(c)
+	}
+}
+
+type TickStepsItem struct {
+	AbovePrice float64
+	TickSize   float64
+}
+
+func (m *TickStepsItem) PPrint(i int) {
+	PPrintlnInd(i, "AbovePrice:", m.AbovePrice, "| TickSize:", m.TickSize)
+}
+
+func (m *TickStepsItem) Decode(c *Coder) {
+	c.Decode(&m.AbovePrice)
+	c.Decode(&m.TickSize)
 }
