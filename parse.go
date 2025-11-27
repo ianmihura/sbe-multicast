@@ -28,7 +28,7 @@ func stdParser(data []byte) stdmsg.StdMessage {
 	defer coderPool.Put(c)
 
 	// We can return data to dataCh once we finish using Coder
-	defer buffPool.Put(&data)
+	defer buffPool.Put(data)
 
 	frame := stdmsg.FrameHeader{}
 	frame.Decode(c)

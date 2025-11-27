@@ -30,6 +30,7 @@ type InstrumentV2 struct {
 	TickStepsList            []InstrumentV2TickStepsList // TODO make
 	InstrumentName           []uint8
 }
+
 type InstrumentV2TickStepsList struct {
 	AbovePrice float64
 	TickSize   float64
@@ -65,7 +66,7 @@ type Instrument struct {
 }
 
 func (m *InstrumentV2) PPrint(i int) {
-	PPrintlnInd(i, "Price Index")
+	PPrintlnInd(i, "Instrument v2")
 	m.Header.PPrint(i + 2)
 	PPrintlnInd(i+2, "InstrumentId:", m.InstrumentId)
 	m.InstrumentState.PPrint(i + 2)
@@ -95,7 +96,7 @@ func (m *InstrumentV2) PPrint(i int) {
 }
 
 func (m *Instrument) PPrint(i int) {
-	PPrintlnInd(i, "Price Index")
+	PPrintlnInd(i, "Instrument")
 	m.Header.PPrint(i + 2)
 	PPrintlnInd(i+2, "InstrumentId:", m.InstrumentId)
 	m.InstrumentState.PPrint(i + 2)

@@ -9,12 +9,12 @@ import (
 	"github.com/ianmihura/sbe-multicast/stdmsg"
 )
 
-const _8KB = 8192
+const _4KB = 4096
 const _64KB = 65_536
 
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
-const FILE = "./pcaps/price_index.pcapng"
+const FILE = "./pcaps/sample_capture_v1_6.pcapng"
 const DATA_CHAN_CAP = 100 // TODO optimize this
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	// dataCh will grab incoming packets from socket
 	//   and carry each packet (message) from Listener to Parser,
 	dataCh := make(chan []byte, DATA_CHAN_CAP)
-	go ListenUDPFast(addr, dataCh, true)
+	go ListenUDPFast(addr, dataCh, false)
 
 	// syncCh will grab finished work of each worker
 	//   and send it to be executed in-line
