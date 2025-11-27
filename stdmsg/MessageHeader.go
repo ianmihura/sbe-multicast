@@ -42,7 +42,9 @@ func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 	case 1002:
 		return nil, NotImplementedTemplateIdError(m.TemplateId)
 	case 1003:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &Ticker{}
+		obj.Header = *m
+		return obj, nil
 	case 1004:
 		return nil, NotImplementedTemplateIdError(m.TemplateId)
 	case 1005:
