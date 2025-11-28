@@ -93,7 +93,6 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
 		log.Fatal("error in udp: listener", err)
 	}
 
-	// TODO measure biggest message size
 	conn.SetReadBuffer(_64KB)
 
 	log.Println("Listening on", if_addr, "from", addr)

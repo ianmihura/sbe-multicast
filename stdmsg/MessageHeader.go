@@ -19,6 +19,7 @@ type MessageHeader struct {
 	Version          uint16
 	NumGroups        uint16
 	NumVarDataFields uint16
+	SequenceNumber   uint32 // from FrameHeader, not original from SBE MessageHeader
 }
 
 func (m *MessageHeader) Decode(c *Coder) {
@@ -90,6 +91,7 @@ func (m *MessageHeader) PPrint(i int) {
 	PPrintlnInd(i+2, "Version:", m.Version)
 	PPrintlnInd(i+2, "NumGroups:", m.NumGroups)
 	PPrintlnInd(i+2, "NumVarDataFields:", m.NumVarDataFields)
+	PPrintlnInd(i+2, "SequenceNumber:", m.SequenceNumber)
 }
 
 func (m *MessageHeader) getTemplateName() string {

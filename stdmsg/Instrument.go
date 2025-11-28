@@ -148,7 +148,7 @@ func (m *InstrumentV2) Decode(c *Coder) {
 	c.Decode(&m.BlockTradeCommission)
 	c.Decode(&m.MaxLiquidationCommission)
 	c.Decode(&m.MaxLeverage)
-	// TODO TickStepsList
+	m.TickStepsList.Decode(c)
 	m.InstrumentName.Decode(c)
 }
 

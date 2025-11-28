@@ -31,6 +31,8 @@ func (c *Coder) ResetOffset() {
 func (c *Coder) Decode(data any) {
 	n, err := binary.Decode(c.buff[c.off:], c.order, data)
 	if err != nil {
+		// fmt.Printf("%p:%d | %d len(%d)\n", &c.buff, c.off, n, len(c.buff))
+		// fmt.Println(hex.Dump(c.buff))
 		log.Fatal("error in decode: ", err)
 	}
 	c.off += n

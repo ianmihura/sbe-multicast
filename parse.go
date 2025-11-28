@@ -32,10 +32,8 @@ func stdParser(data []byte) stdmsg.StdMessage {
 
 	frame := stdmsg.FrameHeader{}
 	frame.Decode(c)
-	// frame.PPrint(0)
-	// TODO send frame (seq num) via msg to sync
 
-	header := stdmsg.MessageHeader{}
+	header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber}
 	header.Decode(c)
 
 	msg, err := header.GetConcreteMessage()
