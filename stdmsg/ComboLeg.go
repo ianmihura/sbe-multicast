@@ -6,6 +6,18 @@ type ComboLegs struct {
 	LegsList     GroupComboLegsLegsList
 }
 
+func (m *ComboLegs) PPrint(i int) {
+	PPrintlnInd(i, "ComboLegs")
+	m.Header.PPrint(i + 2)
+	PPrintlnInd(i+2, "InstrumentId:", m.InstrumentId)
+	m.LegsList.PPrint(i + 2)
+}
+
+func (m *ComboLegs) Decode(c *Coder) {
+	c.Decode(&m.InstrumentId)
+	m.LegsList.Decode(c)
+}
+
 type GroupComboLegsLegsList struct {
 	GroupHeader GroupSizeEncoding
 	Legs        []ComboLegsLegsItem

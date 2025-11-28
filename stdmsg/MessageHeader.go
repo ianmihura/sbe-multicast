@@ -62,7 +62,9 @@ func (m *MessageHeader) GetConcreteMessage() (StdMessage, error) {
 		obj.Header = *m
 		return obj, nil
 	case 1007:
-		return nil, NotImplementedTemplateIdError(m.TemplateId)
+		obj := &ComboLegs{}
+		obj.Header = *m
+		return obj, nil
 	case 1008:
 		obj := &PriceIndex{}
 		obj.Header = *m
