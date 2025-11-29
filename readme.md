@@ -1,19 +1,47 @@
 # SBE Multicast tooling
 
-Simple Binary Encoding (SBE)
+Simple Binary Encode (SBE) parsing app that receives market data packets via multicast and prints them out to stdout.
 
-{explain}
+Using Deribit (a crypto derivatives exchange) as example. Find the following page with relevant documentation https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide.
 
 # How to use
 
 If your machine already supports multicast (and that's a big if), simply run `go run .` to see the program load a sample capture and parse it. You can also compile for your system with `go build`
 
-### Updates
+TODO: additional options:
+- monitor/print
+- loop
+- ping/sample
 
-For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)
+# Architecture
 
-# References
+We use goroutines to split the work up. Find boot implementation in `main.go` file.
+1. Spinup the listener
+    - Its only task is to receive the messages and relay them to the `dataCh` for workers to read
+2. Spinup workers
+    - We may have as many as procesors in the machine: `runtime.NumCPU()`
+    - They do the bulk of the work: parsing from bytes stream to our stdmessage class, ready to be used
+    - Relay the result via `syncCh`
+3. Spinup sync goroutine
+    - It will receive the finished work of the workers, via `syncCh`
+    - Here is where we will print to stdout, monitor performance, sort packets and verify pkt drops
+4. Lastly: spinup the packet replayer
+    - It loads the sample pcap captures and sends them to an mcast group
 
+### Monitoring performance
+
+Monitoring e2e work (reception -> parsing -> sync):
+
+```sh
+# taskset -c 0 go run .
+2025/11/29 14:09:02.126383 Listening on &{5 1500 wlan0 38:68:93:ea:87:0b up|broadcast|multicast|running} from 239.222.222.2:6200
+2025/11/29 14:09:03.156624 Sending on 239.222.222.2:6200
+2025/11/29 14:09:04.512231 Total Rcv: 10000 | PPS: 15428
+2025/11/29 14:09:05.032443 Total Rcv: 20000 | PPS: 19225
+2025/11/29 14:09:05.520770 Total Rcv: 30000 | PPS: 20480
+2025/11/29 14:09:06.037357 Total Rcv: 40000 | PPS: 19359
+2025/11/29 14:09:06.458361 Total Rcv: 50000 | PPS: 23755
+```
 
 ### Deribit Multicast Dev Guide
-https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide
+For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)

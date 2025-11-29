@@ -6,7 +6,6 @@ import (
 	"net"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
@@ -65,8 +64,6 @@ func PingUDPLoopback(addr_ string) {
 			log.Fatal("error in udp:", err)
 		}
 
-		// log.Println(nBytes, "sent to addr", addr)
-		time.Sleep(time.Second)
 		i += 1
 	}
 }
@@ -173,9 +170,7 @@ func ReplayUDP(file string, addr_ string) {
 	log.Println("Sending on", addr)
 	for {
 		for _, packet := range packets {
-			// time.Sleep(time.Second)
 			conn.Write(packet.ApplicationLayer().Payload())
 		}
-		// log.Println(">>> eof, replaying caputre")
 	}
 }
