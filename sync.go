@@ -28,6 +28,7 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage) {
 			elapsed := now.Sub(last)
 			pps := int(float64(rcv) / elapsed.Seconds())
 
+			// TODO monitor mbps
 			log.Printf("Total Rcv: %d | PPS: %d", totrcv, pps)
 
 			rcv = 0

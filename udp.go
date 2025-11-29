@@ -14,6 +14,7 @@ import (
 const IFACE = "wlan0"
 const LO_ADDR = "127.0.0.1"
 
+// Need to init the conn with a specific sockopt for iface=lo
 func getConnLO() (conn *net.UDPConn) {
 	localAddr, err := net.ResolveUDPAddr("udp4", LO_ADDR+":0")
 	if err != nil {
@@ -108,7 +109,8 @@ var buffPool = sync.Pool{
 	},
 }
 
-// Listens for incoming multicast messages from an addr, sends messages via dataCh
+// Listens for incoming multicast messages from an addr, sends messages via dataCh.
+// Can also dump hex payload to stdout if isLogging
 func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
 	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
