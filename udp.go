@@ -5,32 +5,67 @@ import (
 	"log"
 	"net"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 )
 
+const IFACE = "wlan0"
+const LO_ADDR = "127.0.0.1"
+
+func getConnLO() (conn *net.UDPConn) {
+	localAddr, err := net.ResolveUDPAddr("udp4", LO_ADDR+":0")
+	if err != nil {
+		log.Fatal("error in udp:", err)
+	}
+
+	conn, err = net.ListenUDP("udp4", localAddr)
+	if err != nil {
+		log.Fatal("error in udp:", err)
+	}
+
+	rawConn, err := conn.SyscallConn()
+	if err != nil {
+		log.Fatal("error in udp:", err)
+	}
+
+	// mark sender to receive its own packets
+	if rawConn.Control(func(fd uintptr) {
+		err := syscall.SetsockoptInt(int(fd), syscall.IPPROTO_IP, syscall.IP_MULTICAST_LOOP, 1)
+		if err != nil {
+			log.Fatal("error in udp config:", err)
+		}
+	}) != nil {
+		log.Fatal("error in udp config:", err)
+	}
+
+	return conn
+}
+
 // Pings an number (even increasing) to a udp addr
-func PingUDP(addr_ string) {
+func PingUDPLoopback(addr_ string) {
+	if IFACE != "lo" {
+		log.Fatalln("error in udp: const IFACE != `lo`")
+	}
+
 	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
 		log.Fatal("error in udp:", err)
 	}
 
-	conn, err := net.DialUDP("udp4", nil, addr)
-	if err != nil {
-		log.Fatal("error in udp:", err)
-	}
+	conn := getConnLO()
+	defer conn.Close()
 
 	var i int32 = 0
 	for {
-		nBytes, err := conn.Write([]byte(string(i)))
+		_, err := conn.WriteToUDP([]byte(string(i)), addr)
 		if err != nil {
 			log.Fatal("error in udp:", err)
 		}
 
-		log.Println(nBytes, "sent to addr", addr)
+		// log.Println(nBytes, "sent to addr", addr)
 		time.Sleep(time.Second)
 		i += 1
 	}
@@ -43,7 +78,7 @@ func ListenUDPSingle(addr_ string, handler_ func(*net.UDPAddr, int, []byte)) {
 		log.Fatal("error in udp:", err)
 	}
 
-	if_addr, err := net.InterfaceByName("wlan0")
+	if_addr, err := net.InterfaceByName(IFACE)
 	if err != nil {
 		log.Fatal("error in udp:", err)
 	}
@@ -78,17 +113,17 @@ var buffPool = sync.Pool{
 
 // Listens for incoming multicast messages from an addr, sends messages via dataCh
 func ListenUDPFast(addr_ string, dataCh chan<- []byte, isLogging bool) {
-	addr, err := net.ResolveUDPAddr("udp", addr_)
+	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
 		log.Fatal("error in udp listener:", err)
 	}
 
-	if_addr, err := net.InterfaceByName("wlan0")
+	if_addr, err := net.InterfaceByName(IFACE)
 	if err != nil {
 		log.Fatal("error in udp listener:", err)
 	}
 
-	conn, err := net.ListenMulticastUDP("udp", if_addr, addr)
+	conn, err := net.ListenMulticastUDP("udp4", if_addr, addr)
 	if err != nil {
 		log.Fatal("error in udp: listener", err)
 	}
@@ -135,12 +170,12 @@ func ReplayUDP(file string, addr_ string) {
 	}
 	defer conn.Close()
 
-	log.Println("Sending on", addr_)
-	// for {
-	for _, packet := range packets {
-		// time.Sleep(time.Second)
-		conn.Write(packet.ApplicationLayer().Payload())
+	log.Println("Sending on", addr)
+	for {
+		for _, packet := range packets {
+			// time.Sleep(time.Second)
+			conn.Write(packet.ApplicationLayer().Payload())
+		}
+		// log.Println(">>> eof, replaying caputre")
 	}
-	// log.Println(">>> eof, replaying caputre")
-	// }
 }

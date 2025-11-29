@@ -48,3 +48,14 @@ sudo sysctl -w net.ipv4.tcp_tw_reuse=1 # it was 2
 sudo sysctl net.ipv4.conf.all.rp_filter=0  # it was 1
 sudo sysctl net.ipv4.conf.wlan0.rp_filter=0  # it was 2
 sudo sysctl net.ipv4.conf.default.rp_filter=0  # it was 1
+
+# Add ips
+```sh
+for i in `seq 1 20`; do sudo ip addr add 192.168.254.$i/24 dev enp4s0; done
+```
+# Trace utils
+```sh
+watch 'ss -uml' 
+watch 'ss -ums'
+watch 'cat /proc/interrupts | column -t'
+```

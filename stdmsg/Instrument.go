@@ -1,7 +1,6 @@
 package stdmsg
 
 import (
-	"log"
 	"time"
 )
 
@@ -91,7 +90,6 @@ func (m *InstrumentV2) PPrint(i int) {
 	PPrintlnInd(i+2, "MaxLeverage:", m.MaxLeverage)
 	m.TickStepsList.PPrint(i + 2)
 	m.InstrumentName.PPrintCustom(i+2, "InstrumentName:")
-	log.Fatal("instrument v2 check it works")
 }
 
 func (m *Instrument) PPrint(i int) {

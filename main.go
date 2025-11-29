@@ -48,6 +48,7 @@ func main() {
 
 	// Replay packets
 	time.Sleep(time.Second) // sleep 1sec to allow listener & workers to spinup
+	// go PingUDPLoopback(addr)
 	go ReplayUDP(FILE, addr)
 
 	// Keep app alive
@@ -59,3 +60,4 @@ func main() {
 // https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
 // https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
 // https://blog.cloudflare.com/how-to-receive-a-million-packets/
+// https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
