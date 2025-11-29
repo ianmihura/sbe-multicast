@@ -43,5 +43,10 @@ Monitoring e2e work (reception -> parsing -> sync):
 2025/11/29 14:09:06.458361 Total Rcv: 50000 | PPS: 23755
 ```
 
+# Additional tooling
+
+- Find a list of usefull commands documented in `tools.md`
+- (upcoming) Some articles telling how I built and tested this app
+
 ### Deribit Multicast Dev Guide
 For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)

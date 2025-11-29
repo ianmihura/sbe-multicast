@@ -23,13 +23,13 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage) {
 		rcv++
 
 		if rcv >= 10_000 {
+			totrcv += rcv
 			now := time.Now()
 			elapsed := now.Sub(last)
 			pps := int(float64(rcv) / elapsed.Seconds())
 
 			log.Printf("Total Rcv: %d | PPS: %d", totrcv, pps)
 
-			totrcv += rcv
 			rcv = 0
 			last = time.Now()
 		}
