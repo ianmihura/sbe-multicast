@@ -7,7 +7,8 @@ import (
 	"log"
 )
 
-// Decoder struct, inspired by encoding/binary : coder struct
+// Decoder struct, inspired by encoding/binary:coder.
+// Consider implementing bytes/buffer interface
 type Coder struct {
 	order binary.ByteOrder
 	buff  []byte

@@ -15,7 +15,7 @@ const _64KB = 65_536
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
 const FILE = "./pcaps/sample_capture_v1_6.pcapng"
-const DATA_CHAN_CAP = 100 // TODO optimize this
+const DATA_CHAN_CAP = 100 // TODO maybe use un-buffered chan?
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -36,7 +36,7 @@ func main() {
 
 	// syncCh will grab finished work of each worker
 	//   and send it to be executed in-line
-	syncCh := make(chan *stdmsg.StdMessage, nProc*2) // TODO is nProc*2 enough?
+	syncCh := make(chan *stdmsg.StdMessage, nProc*2)
 
 	// We spinup n workers (as NumCPU)
 	for range nProc {
@@ -61,3 +61,7 @@ func main() {
 // https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
 // https://blog.cloudflare.com/how-to-receive-a-million-packets/
 // https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
+// https://ntk148v.github.io/posts/linux-network-performance-ultimate-guide/
+// https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
+// https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
+// https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/

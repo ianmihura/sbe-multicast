@@ -8,11 +8,6 @@ Using Deribit (a crypto derivatives exchange) as example. Find the following pag
 
 If your machine already supports multicast (and that's a big if), simply run `go run .` to see the program load a sample capture and parse it. You can also compile for your system with `go build`
 
-TODO: additional options:
-- monitor/print
-- loop
-- ping/sample
-
 # Architecture
 
 We use goroutines to split the work up. Find boot implementation in `main.go` file.
@@ -50,3 +45,21 @@ Monitoring e2e work (reception -> parsing -> sync):
 
 ### Deribit Multicast Dev Guide
 For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)
+
+### TODO explore further:
+- cleaner main.go ui:
+    - mode monitor/print
+    - loop bool
+    - mode ping/replay sample
+- sort pkts:
+    - out-of-order
+    - network gaps (drops)
+- state interpretation:
+    - mapping instrument_id : instrument_name
+- state repr + recovery (protobuf?)
+- snapshot + incremental replay
+- multiple channels - ip:port listen to different asset bases
+- perf:
+    - size of buffs
+    - kernel tuning
+    - cpu affinity - monitor cpus and goroutines closer
