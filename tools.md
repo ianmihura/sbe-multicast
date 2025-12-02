@@ -1,6 +1,8 @@
-# what is the main router
+# iface and router
 ```sh
-ip route get 224.0.0.1
+sudo ip link set dev lo multicast on  # enable mcast on iface
+ip route get 224.0.0.1  # what is the default mcast iface
+sudo ip route add 224.0.0.0/4 dev lo  # set as default mcast
 ```
 
 # sniff upd packets on wlan0 interface for port 9999

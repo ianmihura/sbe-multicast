@@ -1,12 +1,16 @@
 package main
 
 import (
+	"flag"
 	"log"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
 
 	"github.com/ianmihura/sbe-multicast/stdmsg"
+
+	_ "net/http/pprof"
 )
 
 const _4KB = 4096
@@ -17,12 +21,34 @@ const MC_PORT = "6200"
 const FILE = "./pcaps/sample_capture_v1_6.pcapng"
 const DATA_CHAN_CAP = 100 // TODO maybe use un-buffered chan?
 
+var Mode *string
+var Iface *string
+var IsLoop bool = false
+var IsP bool = false
+var IsH bool = false
+var IsM bool = false
+
 func main() {
+	// TODO choose sample file
+	Mode = flag.String("mode", "sample", "Replay mode.\n  Options: [ping, sample].")
+	Iface = flag.String("iface", "wlan0", "Network interface.\n  Check available ifaces with `ip link`")
+	isLoop_ := flag.Bool("l", false, "Loop: inifinite loop for pkt replay. Otherwise:\n  ping: 10 pkts.\n  sample: replay sample once")
+	isp_ := flag.Bool("p", false, "Pretty-Print parsed SBE structs")
+	ish_ := flag.Bool("h", false, "Hex dump received network pkts\n  (if not looping, app may end before printing full hex dump)")
+	ism_ := flag.Bool("m", false, "Monitoring network pkts (sent & received)")
+	flag.Parse()
+	IsLoop = *isLoop_
+	IsP = *isp_ && (*Mode == "sample")
+	IsH = *ish_
+	IsM = *ism_
+
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	nProc := runtime.NumCPU()
 	runtime.GOMAXPROCS(nProc)
-
 	addr := MC_GROUP + ":" + MC_PORT
+
+	// kill signal - quit gracefully
+	killCh := make(chan os.Signal, 1)
 
 	// Using single thread we can parse each packet right after reception
 	// ListenUDPSingle(addr, ParseSingle)
@@ -30,9 +56,9 @@ func main() {
 	//   parsing to parser workers
 
 	// dataCh will grab incoming packets from socket
-	//   and carry each packet (message) from Listener to Parser,
+	//   and carry each packet (message) from Listener to Parser
 	dataCh := make(chan []byte, DATA_CHAN_CAP)
-	go ListenUDPFast(addr, dataCh, false)
+	go ListenUDPFast(addr, dataCh)
 
 	// syncCh will grab finished work of each worker
 	//   and send it to be executed in-line
@@ -44,24 +70,24 @@ func main() {
 	}
 
 	// Sync up the work as we receive it
-	go SyncWorkers(syncCh)
+	go SyncWorkers(syncCh, killCh)
 
-	// Replay packets
-	time.Sleep(time.Second) // sleep 1sec to allow listener & workers to spinup
-	// go PingUDPLoopback(addr)
-	go ReplayUDP(FILE, addr)
+	// Send packets
+	if !IsLoop {
+		time.Sleep(time.Second) // sleep 1sec to allow listener & workers to spinup
+	}
+	if *Mode == "ping" {
+		go PingUDP(addr, killCh)
+	} else {
+		go ReplayUDP(FILE, addr, killCh)
+	}
+
+	// For pperf
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	// Keep app alive
-	c := make(chan os.Signal, 1)
-	s := <-c
+	s := <-killCh
 	log.Printf("Received signal '%v', halting program\n", s)
 }
-
-// https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
-// https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
-// https://blog.cloudflare.com/how-to-receive-a-million-packets/
-// https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
-// https://ntk148v.github.io/posts/linux-network-performance-ultimate-guide/
-// https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
-// https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
-// https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/

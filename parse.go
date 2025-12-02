@@ -17,8 +17,12 @@ var coderPool = sync.Pool{
 func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage) {
 	// TODO sort elements in all stdmsg structs to make them smaller
 	for data := range dataCh {
-		msg := stdParser(data)
-		syncCh <- &msg
+		if *Mode == "ping" {
+			syncCh <- nil
+		} else {
+			msg := stdParser(data)
+			syncCh <- &msg
+		}
 	}
 }
 

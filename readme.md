@@ -6,7 +6,27 @@ Using Deribit (a crypto derivatives exchange) as example. Find the following pag
 
 # How to use
 
-If your machine already supports multicast (and that's a big if), simply run `go run .` to see the program load a sample capture and parse it. You can also compile for your system with `go build`
+If your machine already supports multicast (and that's a big if), simply run `go run . -v` to see the program load a sample capture, send it via multicast and parse it. You can also compile for your system with `go build .`.
+
+Available flags:
+
+```
+# go run . --help
+  -h    Hex dump received network pkts
+          (if not looping, app may end before printing full hex dump)
+  -iface ip link
+        Network interface.
+          Check available ifaces with ip link (default "wlan0")
+  -l    Loop: inifinite loop for pkt replay. Otherwise:
+          ping: 10 pkts.
+          sample: replay sample once
+  -m    Monitoring network pkts (sent & received)
+  -mode string
+        Replay mode.
+          Options: [ping, sample]. (default "sample")
+  -p    Pretty-Print parsed SBE structs
+```
+
 
 # Architecture
 
@@ -47,10 +67,6 @@ Monitoring e2e work (reception -> parsing -> sync):
 For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)
 
 ### TODO explore further:
-- cleaner main.go ui:
-    - mode monitor/print
-    - loop bool
-    - mode ping/replay sample
 - sort pkts:
     - out-of-order
     - network gaps (drops)
@@ -60,6 +76,21 @@ For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https:
 - snapshot + incremental replay
 - multiple channels - ip:port listen to different asset bases
 - perf:
+    - pprof
+        https://dev.to/jones_charles_ad50858dbc0/a-hands-on-guide-to-supercharging-your-go-apps-with-pprof-57m2
+        https://go.dev/blog/pprof
+        https://pkg.go.dev/net/http/pprof
     - size of buffs
     - kernel tuning
     - cpu affinity - monitor cpus and goroutines closer
+
+
+// https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
+// https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
+// https://blog.cloudflare.com/how-to-receive-a-million-packets/
+// https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
+// https://ntk148v.github.io/posts/linux-network-performance-ultimate-guide/
+// https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
+// https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
+// https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/
+
