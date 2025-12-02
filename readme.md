@@ -25,6 +25,8 @@ Available flags:
         Replay mode.
           Options: [ping, sample]. (default "sample")
   -p    Pretty-Print parsed SBE structs
+  -pprof
+        Serve pprof standard server on localhost:8080
 ```
 
 
@@ -84,13 +86,13 @@ For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https:
     - kernel tuning
     - cpu affinity - monitor cpus and goroutines closer
 
-
-// https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
-// https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
-// https://blog.cloudflare.com/how-to-receive-a-million-packets/
-// https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
-// https://ntk148v.github.io/posts/linux-network-performance-ultimate-guide/
-// https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
-// https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
-// https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/
+Links
+- https://jewelhuq.medium.com/mastering-high-performance-tcp-udp-socket-programming-in-go-996dc85f5de1
+- https://stackoverflow.com/questions/60337662/how-to-maximise-udp-packets-per-second-with-go
+- https://blog.cloudflare.com/how-to-receive-a-million-packets/
+- https://tungdam.medium.com/linux-network-ring-buffers-cea7ead0b8e8
+- https://ntk148v.github.io/posts/linux-network-performance-ultimate-guide/
+- https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
+- https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
+- https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/
 
