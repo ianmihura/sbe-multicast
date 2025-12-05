@@ -25,8 +25,10 @@ Available flags:
         Replay mode.
           Options: [ping, sample]. (default "sample")
   -p    Pretty-Print parsed SBE structs
+          (if not looping, app may end before printing full hex dump)
   -pprof
         Serve pprof standard server on localhost:8080
+  -v    Verbose. Unstructured monitoring.
 ```
 
 
@@ -50,14 +52,20 @@ We use goroutines to split the work up. Find boot implementation in `main.go` fi
 Monitoring e2e work (reception -> parsing -> sync):
 
 ```sh
-# taskset -c 0 go run .
-2025/11/29 14:09:02.126383 Listening on &{5 1500 wlan0 38:68:93:ea:87:0b up|broadcast|multicast|running} from 239.222.222.2:6200
-2025/11/29 14:09:03.156624 Sending on 239.222.222.2:6200
-2025/11/29 14:09:04.512231 Total Rcv: 10000 | PPS: 15428
-2025/11/29 14:09:05.032443 Total Rcv: 20000 | PPS: 19225
-2025/11/29 14:09:05.520770 Total Rcv: 30000 | PPS: 20480
-2025/11/29 14:09:06.037357 Total Rcv: 40000 | PPS: 19359
-2025/11/29 14:09:06.458361 Total Rcv: 50000 | PPS: 23755
+# taskset -c 0 go run . -l -m
+2025/12/03 20:01:13.721270 Listening on &{5 1500 wlan0 38:68:93:ea:87:0b up|broadcast|multicast|running} from 239.222.222.2:6200
+2025/12/03 20:01:13.723457 Sending on 239.222.222.2:6200
+2025/12/03 20:01:14.224713 Pkts Sent: 10000 | PPS: 19950
+2025/12/03 20:01:14.328048 Pkts Processed: 10000 | PPS: 16482
+2025/12/03 20:01:14.740398 Pkts Sent: 20000 | PPS: 38784
+2025/12/03 20:01:14.969080 Pkts Processed: 20000 | PPS: 31201
+2025/12/03 20:01:15.237398 Pkts Sent: 30000 | PPS: 60364
+2025/12/03 20:01:15.565645 Pkts Processed: 30000 | PPS: 50289
+2025/12/03 20:01:15.705207 Pkts Sent: 40000 | PPS: 85507
+2025/12/03 20:01:16.166994 Pkts Processed: 40000 | PPS: 66518
+2025/12/03 20:01:16.205463 Pkts Sent: 50000 | PPS: 99957
+2025/12/03 20:01:16.692619 Pkts Sent: 60000 | PPS: 123167
+2025/12/03 20:01:16.756403 Pkts Processed: 50000 | PPS: 84833
 ```
 
 # Additional tooling

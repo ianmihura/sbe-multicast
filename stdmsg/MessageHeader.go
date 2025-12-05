@@ -20,6 +20,7 @@ type MessageHeader struct {
 	NumGroups        uint16
 	NumVarDataFields uint16
 	SequenceNumber   uint32 // from FrameHeader, not original from SBE MessageHeader
+	Tmp              uint32 // Scratchtape variable for debugging
 }
 
 func (m *MessageHeader) Decode(c *Coder) {
@@ -92,6 +93,7 @@ func (m *MessageHeader) PPrint(i int) {
 	PPrintlnInd(i+2, "NumGroups:", m.NumGroups)
 	PPrintlnInd(i+2, "NumVarDataFields:", m.NumVarDataFields)
 	PPrintlnInd(i+2, "SequenceNumber:", m.SequenceNumber)
+	PPrintlnInd(i+2, "-- Tmp:", m.Tmp)
 }
 
 func (m *MessageHeader) getTemplateName() string {

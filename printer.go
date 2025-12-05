@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 )
 
@@ -19,7 +20,14 @@ func PrintNetworkMonitor(pkts int, last *time.Time, action string) {
 
 		// TODO monitor mbps
 		log.Printf("Pkts %s: %d | PPS: %d", action, pkts, pps)
-
-		(*last) = time.Now()
 	}
+}
+
+func VPrint(killCh chan<- os.Signal) {
+	// for {
+	// 	time.Sleep(time.Second * 2)
+	// 	log.Println(Freq)
+	// 	log.Println()
+	// 	killCh <- os.Kill
+	// }
 }

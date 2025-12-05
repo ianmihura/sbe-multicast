@@ -44,6 +44,7 @@ func PingUDP(addr_ string, killCh chan<- os.Signal) {
 		}
 
 		if !IsLoop && i >= 9 {
+			time.Sleep(time.Second / 10) // wait for all parse workers to finish their work
 			killCh <- os.Kill
 		}
 	}
@@ -51,7 +52,7 @@ func PingUDP(addr_ string, killCh chan<- os.Signal) {
 
 var buffPool = sync.Pool{
 	New: func() any {
-		return make([]byte, _4KB)
+		return make([]byte, _1KB)
 	},
 }
 
@@ -73,11 +74,11 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte) {
 		log.Fatal("error in udp: listener", err)
 	}
 
-	conn.SetReadBuffer(_64KB)
+	conn.SetReadBuffer(_1KB * 128)
 
 	log.Println("Listening on", if_addr, "from", addr)
 	for {
-		buff := buffPool.Get().([]byte)[:_4KB]
+		buff := buffPool.Get().([]byte)[:_1KB]
 
 		nBytes, src, err := conn.ReadFromUDP(buff)
 		if err != nil {
@@ -133,6 +134,7 @@ func ReplayUDP(file string, addr_ string, killCh chan<- os.Signal) {
 			}
 		}
 		if !IsLoop {
+			time.Sleep(time.Second / 10) // wait for all parse workers to finish their work
 			killCh <- os.Kill
 		}
 	}

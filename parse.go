@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net"
 	"sync"
 
 	"github.com/ianmihura/sbe-multicast/stdmsg"
@@ -14,19 +13,18 @@ var coderPool = sync.Pool{
 	},
 }
 
-func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage) {
-	// TODO sort elements in all stdmsg structs to make them smaller
+func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, goid uint32) {
 	for data := range dataCh {
 		if *Mode == "ping" {
 			syncCh <- nil
 		} else {
-			msg := stdParser(data)
+			msg := stdParser(data, goid)
 			syncCh <- &msg
 		}
 	}
 }
 
-func stdParser(data []byte) stdmsg.StdMessage {
+func stdParser(data []byte, goid uint32) stdmsg.StdMessage {
 	c := coderPool.Get().(*stdmsg.Coder)
 	c.SetBuffer(&data)
 	c.ResetOffset()
@@ -38,7 +36,7 @@ func stdParser(data []byte) stdmsg.StdMessage {
 	frame := stdmsg.FrameHeader{}
 	frame.Decode(c)
 
-	header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber}
+	header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber, Tmp: goid}
 	header.Decode(c)
 
 	msg, err := header.GetConcreteMessage()
@@ -48,9 +46,4 @@ func stdParser(data []byte) stdmsg.StdMessage {
 	msg.Decode(c)
 
 	return msg
-}
-
-func ParseSingle(src *net.UDPAddr, nBytes int, buff []byte) {
-	msg := stdParser(buff)
-	msg.PPrint(0)
 }
