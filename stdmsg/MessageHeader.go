@@ -19,7 +19,8 @@ type MessageHeader struct {
 	Version          uint16
 	NumGroups        uint16
 	NumVarDataFields uint16
-	SequenceNumber   uint32 // from FrameHeader, not original from SBE MessageHeader
+	SequenceNumber   uint32 // from FrameHeader, order of frame
+	ChannelId        uint16 // from FrameHeader, source channel
 	Tmp              uint32 // Scratchtape variable for debugging
 }
 

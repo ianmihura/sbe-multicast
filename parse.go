@@ -24,16 +24,18 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, goid ui
 			c.ResetOffset()
 			defer coderPool.Put(c)
 
-			// We can return data to dataCh once we finish using Coder
+			// We can return data to dataCh pool once we finish using Coder
 			defer buffPool.Put(data)
 
 			frame := stdmsg.FrameHeader{}
 			frame.Decode(c)
 
 			for uint16(c.GetOffset()) < frame.PacketLength {
-				// TODO reset the coder buffer ??
-
-				header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber, Tmp: goid}
+				header := stdmsg.MessageHeader{
+					SequenceNumber: frame.SequenceNumber,
+					ChannelId:      frame.ChannelId,
+					Tmp:            goid,
+				}
 				header.Decode(c)
 
 				msg, err := header.GetConcreteMessage()
