@@ -26,7 +26,7 @@ func PingUDP(addr_ string, killCh chan<- os.Signal) {
 	defer conn.Close()
 
 	i := 0
-	last := time.Now()
+	start := time.Now()
 	for {
 		if *Iface == "lo" {
 			_, err = conn.WriteToUDP([]byte(string(i)), addr)
@@ -40,7 +40,7 @@ func PingUDP(addr_ string, killCh chan<- os.Signal) {
 		i++
 
 		if IsM {
-			PrintNetworkMonitor(i, &last, "Sent")
+			go PrintNetworkMonitor(i, &start, "Sent")
 		}
 
 		if !IsLoop && i >= 9 {
@@ -58,7 +58,7 @@ var buffPool = sync.Pool{
 
 // Listens for incoming multicast messages from an addr, sends messages via dataCh.
 // Can also dump hex payload to stdout if isLogging
-func ListenUDPFast(addr_ string, dataCh chan<- []byte) {
+func ListenUDPFast(addr_ string, dataCh chan<- []byte, start *time.Time) {
 	addr, err := net.ResolveUDPAddr("udp4", addr_)
 	if err != nil {
 		log.Fatal("error in udp listener:", err)
@@ -74,8 +74,9 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte) {
 		log.Fatal("error in udp: listener", err)
 	}
 
-	conn.SetReadBuffer(_8KB)
+	conn.SetReadBuffer(_8KB * 128) // 1MB read buffer (overkill)
 
+	rcv := 0
 	log.Println("Listening on", if_addr, "from", addr)
 	for {
 		buff := buffPool.Get().([]byte)[:_8KB]
@@ -89,6 +90,11 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte) {
 		}
 
 		dataCh <- buff[:nBytes]
+
+		if IsM {
+			rcv++
+			go PrintNetworkMonitor(rcv, start, "Received")
+		}
 	}
 }
 
@@ -115,17 +121,16 @@ func ReplayUDP(file string, addr_ string, killCh chan<- os.Signal) {
 
 	log.Println("Sending on", addr)
 	pktsent := 0
-	last := time.Now()
+	start := time.Now()
 	for {
 		for _, packet := range packets {
+			// // We know channels are in range 293.111.111.0 - 26
+			// if packet.NetworkLayer().NetworkFlow().Dst().Raw()[3] != 2 {
+			// 	// Channel 239.111.111.2 is BTC-Options (Events and Snapshots)
+			// 	continue
+			// }
+
 			var err error
-
-			// We know channels are in range 293.111.111.0 - 26
-			if packet.NetworkLayer().NetworkFlow().Dst().Raw()[3] != 2 {
-				// Channel 239.111.111.2 is BTC-Options (Events and Snapshots)
-				continue
-			}
-
 			if *Iface == "lo" {
 				_, err = conn.WriteToUDP(packet.ApplicationLayer().Payload(), addr)
 			} else {
@@ -137,12 +142,13 @@ func ReplayUDP(file string, addr_ string, killCh chan<- os.Signal) {
 
 			if IsM {
 				pktsent++
-				PrintNetworkMonitor(pktsent, &last, "Sent")
+				go PrintNetworkMonitor(pktsent, &start, "Sent")
 			}
 		}
 		if !IsLoop {
 			time.Sleep(time.Second) // wait for all parse workers to finish their work
 			killCh <- os.Kill
+			return
 		}
 	}
 }

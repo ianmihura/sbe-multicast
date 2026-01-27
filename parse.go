@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/ianmihura/sbe-multicast/stdmsg"
 )
@@ -13,7 +15,8 @@ var coderPool = sync.Pool{
 	},
 }
 
-func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, goid uint32) {
+func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, start *time.Time, rcv *int32) {
+	var rcv_ int32
 	for data := range dataCh {
 		if *Mode == "ping" {
 			syncCh <- nil
@@ -34,16 +37,20 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, goid ui
 				header := stdmsg.MessageHeader{
 					SequenceNumber: frame.SequenceNumber,
 					ChannelId:      frame.ChannelId,
-					Tmp:            goid,
 				}
 				header.Decode(c)
 
 				msg, err := header.GetConcreteMessage()
 				if err != nil {
-					log.Fatal("error in stdParser:", err)
+					log.Fatal(err)
 				}
 				msg.Decode(c)
 				syncCh <- &msg
+			}
+
+			if IsM {
+				rcv_ = atomic.AddInt32(rcv, 1)
+				go PrintNetworkMonitor(int(rcv_), start, "Processed")
 			}
 		}
 	}

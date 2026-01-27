@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"sync/atomic"
-	"time"
 
 	"github.com/ianmihura/sbe-multicast/stdmsg"
 )
@@ -16,10 +14,10 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage, killCh chan<- os.Signal) {
 	// TODO monitoring performance
 	// TODO saving data for replay (eg. protobuf)
 
-	pkts := make(map[string]uint32)
+	// pkts := make(map[string]uint32)
 	var order uint32 = 0
-	rcv := 0
-	last := time.Now()
+	// rcv := 0
+	// start := time.Now()
 
 	for {
 		msg, ok := <-syncCh
@@ -27,13 +25,13 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage, killCh chan<- os.Signal) {
 			killCh <- os.Kill
 		}
 
-		pkts[strconv.Itoa(int((*msg).GetHeader().SequenceNumber))+"_"+strconv.Itoa(int((*msg).GetHeader().TemplateId))] += 1
-		fmt.Println(pkts)
+		// pkts[strconv.Itoa(int((*msg).GetHeader().SequenceNumber))+"_"+strconv.Itoa(int((*msg).GetHeader().TemplateId))] += 1
+		// fmt.Println(pkts)
 
-		if IsM {
-			rcv++
-			PrintNetworkMonitor(rcv, &last, "Processed")
-		}
+		// if IsM {
+		// 	rcv++
+		// 	PrintNetworkMonitor(rcv, &start, "Processed")
+		// }
 		if IsP {
 			fmt.Println()
 			(*msg).PPrint(0)

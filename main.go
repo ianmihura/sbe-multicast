@@ -19,7 +19,7 @@ const _8KB = _1KB * 8
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
 
-const FILE = "./pcaps/combo_legs.pcapng"
+const FILE = "./pcaps/sample_capture_v1_6.pcapng"
 
 // const FILE = "./pcaps/price_index.pcapng"
 const DATA_CHAN_CAP = 1000
@@ -47,6 +47,7 @@ func main() {
 	nProc := runtime.NumCPU()
 	runtime.GOMAXPROCS(nProc)
 	addr := MC_GROUP + ":" + MC_PORT
+	start := time.Now()
 
 	// kill signal - quit gracefully
 	killCh := make(chan os.Signal, 1)
@@ -54,15 +55,16 @@ func main() {
 	// `dataCh` will grab incoming packets from socket
 	//   and carry each packet (message) from Listener to Parser
 	dataCh := make(chan []byte, DATA_CHAN_CAP)
-	go ListenUDPFast(addr, dataCh)
+	go ListenUDPFast(addr, dataCh, &start)
 
 	// `syncCh` will grab finished work of each worker
 	//   and send it to be executed in-line
 	syncCh := make(chan *stdmsg.StdMessage, SYNC_CHAN_CAP)
 
 	// We spinup n workers (as NumCPU)
-	for i := range nProc {
-		go ParseWorker(dataCh, syncCh, uint32(i))
+	rcv := int32(0) // track all rcv packets
+	for range nProc {
+		go ParseWorker(dataCh, syncCh, &start, &rcv)
 	}
 
 	// Sync up the work as we receive it
@@ -77,6 +79,7 @@ func main() {
 	} else {
 		go ReplayUDP(FILE, addr, killCh)
 	}
+	start = time.Now() // time start when the replay starts
 
 	if IsV {
 		go VPrint(killCh)
