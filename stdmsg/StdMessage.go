@@ -31,6 +31,10 @@ func (c *Coder) ResetOffset() {
 	c.off = 0
 }
 
+func (c *Coder) GetOffset() int {
+	return c.off
+}
+
 // Decodes binary data from c.buff starting at c.off, into data according to c.order
 // It quits if buf is too small, dumping useful data to stdout.
 func (c *Coder) Decode(data any) {

@@ -52,7 +52,7 @@ func PingUDP(addr_ string, killCh chan<- os.Signal) {
 
 var buffPool = sync.Pool{
 	New: func() any {
-		return make([]byte, _1KB)
+		return make([]byte, _8KB)
 	},
 }
 
@@ -74,11 +74,11 @@ func ListenUDPFast(addr_ string, dataCh chan<- []byte) {
 		log.Fatal("error in udp: listener", err)
 	}
 
-	conn.SetReadBuffer(_1KB * 128)
+	conn.SetReadBuffer(_8KB)
 
 	log.Println("Listening on", if_addr, "from", addr)
 	for {
-		buff := buffPool.Get().([]byte)[:_1KB]
+		buff := buffPool.Get().([]byte)[:_8KB]
 
 		nBytes, src, err := conn.ReadFromUDP(buff)
 		if err != nil {
@@ -119,6 +119,13 @@ func ReplayUDP(file string, addr_ string, killCh chan<- os.Signal) {
 	for {
 		for _, packet := range packets {
 			var err error
+
+			// We know channels are in range 293.111.111.0 - 26
+			if packet.NetworkLayer().NetworkFlow().Dst().Raw()[3] != 2 {
+				// Channel 239.111.111.2 is BTC-Options (Events and Snapshots)
+				continue
+			}
+
 			if *Iface == "lo" {
 				_, err = conn.WriteToUDP(packet.ApplicationLayer().Payload(), addr)
 			} else {

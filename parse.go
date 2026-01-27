@@ -17,33 +17,32 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, goid ui
 	for data := range dataCh {
 		if *Mode == "ping" {
 			syncCh <- nil
+
 		} else {
-			msg := stdParser(data, goid)
-			syncCh <- &msg
+			c := coderPool.Get().(*stdmsg.Coder)
+			c.SetBuffer(&data)
+			c.ResetOffset()
+			defer coderPool.Put(c)
+
+			// We can return data to dataCh once we finish using Coder
+			defer buffPool.Put(data)
+
+			frame := stdmsg.FrameHeader{}
+			frame.Decode(c)
+
+			for uint16(c.GetOffset()) < frame.PacketLength {
+				// TODO reset the coder buffer ??
+
+				header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber, Tmp: goid}
+				header.Decode(c)
+
+				msg, err := header.GetConcreteMessage()
+				if err != nil {
+					log.Fatal("error in stdParser:", err)
+				}
+				msg.Decode(c)
+				syncCh <- &msg
+			}
 		}
 	}
-}
-
-func stdParser(data []byte, goid uint32) stdmsg.StdMessage {
-	c := coderPool.Get().(*stdmsg.Coder)
-	c.SetBuffer(&data)
-	c.ResetOffset()
-	defer coderPool.Put(c)
-
-	// We can return data to dataCh once we finish using Coder
-	defer buffPool.Put(data)
-
-	frame := stdmsg.FrameHeader{}
-	frame.Decode(c)
-
-	header := stdmsg.MessageHeader{SequenceNumber: frame.SequenceNumber, Tmp: goid}
-	header.Decode(c)
-
-	msg, err := header.GetConcreteMessage()
-	if err != nil {
-		log.Fatal("error in stdParser:", err)
-	}
-	msg.Decode(c)
-
-	return msg
 }

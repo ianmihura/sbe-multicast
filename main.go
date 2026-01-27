@@ -14,6 +14,7 @@ import (
 )
 
 const _1KB = 1024
+const _8KB = _1KB * 8
 
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
