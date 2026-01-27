@@ -100,7 +100,7 @@ func (m *Instrument) PPrint(i int) {
 	m.Kind.PPrint(i + 2)
 	m.InstrumentType.PPrint(i + 2)
 	m.OptionType.PPrint(i + 2)
-	m.Rfq.PPrint(i + 2)
+	m.Rfq.PPrintCustom(i+2, "RFQ:", "yes", "no")
 	m.SettlementPeriod.PPrint(i + 2)
 	PPrintlnInd(i+2, "SettlementPeriodCount:", m.SettlementPeriodCount)
 	PPrintlnInd(i+2, "BaseCurrency:", string(m.BaseCurrency[:]))
