@@ -18,14 +18,15 @@ const _1KB = 1024
 const MC_GROUP = "239.222.222.2"
 const MC_PORT = "6200"
 
-// const FILE = "./pcaps/sample_capture_v1_6.pcapng"
+const FILE = "./pcaps/combo_legs.pcapng"
 
-const FILE = "./pcaps/price_index.pcapng"
+// const FILE = "./pcaps/price_index.pcapng"
 const DATA_CHAN_CAP = 1000
 const SYNC_CHAN_CAP = 1000
 
 // var Freq = make([]int32, SYNC_CHAN_CAP+1)
 
+// Program mode settings
 var Mode *string
 var Iface *string
 var IsLoop bool = false

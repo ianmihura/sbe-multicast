@@ -134,7 +134,7 @@ func ReplayUDP(file string, addr_ string, killCh chan<- os.Signal) {
 			}
 		}
 		if !IsLoop {
-			time.Sleep(time.Second / 10) // wait for all parse workers to finish their work
+			time.Sleep(time.Second) // wait for all parse workers to finish their work
 			killCh <- os.Kill
 		}
 	}

@@ -124,3 +124,47 @@ func (m *MessageHeader) getTemplateName() string {
 		return "unknown"
 	}
 }
+
+func (m *Rfq) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *Instrument) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *Book) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *Trades) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *Ticker) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *Snapshot) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *SnapshotStart) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *SnapshotEnd) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *ComboLegs) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *PriceIndex) GetHeader() MessageHeader {
+	return m.Header
+}
+
+func (m *InstrumentV2) GetHeader() MessageHeader {
+	return m.Header
+}

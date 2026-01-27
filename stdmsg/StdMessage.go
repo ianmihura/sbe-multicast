@@ -10,9 +10,9 @@ import (
 // Decoder struct, inspired by encoding/binary:coder.
 // Consider implementing bytes/buffer interface
 type Coder struct {
-	order binary.ByteOrder
-	buff  []byte
-	off   int
+	order binary.ByteOrder // LittleEndian
+	buff  []byte           // buffer
+	off   int              // offset
 }
 
 func NewEmptyCoder() *Coder {
@@ -36,9 +36,10 @@ func (c *Coder) ResetOffset() {
 func (c *Coder) Decode(data any) {
 	n, err := binary.Decode(c.buff[c.off:], c.order, data)
 	if err != nil {
+		// if buff is too small, we probably messed up the message type
 		log.Printf("%p:%d | %d len(%d)\n", &c.buff, c.off, n, len(c.buff))
 		log.Println(hex.Dump(c.buff))
-		log.Fatal("error in decode: ", err)
+		log.Fatal("error in decode: ", err) // halts execution
 	}
 	c.off += n
 }
@@ -46,6 +47,7 @@ func (c *Coder) Decode(data any) {
 type StdMessage interface {
 	Decode(c *Coder)   // Decodes with binary.Decode
 	PPrint(indent int) // Pretty Print with an indent
+	GetHeader() MessageHeader
 }
 
 // fmt.Println with `indent` number of spaces before.

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -15,6 +16,7 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage, killCh chan<- os.Signal) {
 	// TODO monitoring performance
 	// TODO saving data for replay (eg. protobuf)
 
+	pkts := make(map[string]uint32)
 	var order uint32 = 0
 	rcv := 0
 	last := time.Now()
@@ -24,6 +26,9 @@ func SyncWorkers(syncCh <-chan *stdmsg.StdMessage, killCh chan<- os.Signal) {
 		if !ok {
 			killCh <- os.Kill
 		}
+
+		pkts[strconv.Itoa(int((*msg).GetHeader().SequenceNumber))+"_"+strconv.Itoa(int((*msg).GetHeader().TemplateId))] += 1
+		fmt.Println(pkts)
 
 		if IsM {
 			rcv++
