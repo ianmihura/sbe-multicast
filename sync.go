@@ -26,7 +26,7 @@ func SyncWorkers(rBuffs *RingBuffers, killCh chan<- os.Signal) {
 		// channel, based on the info provided
 		cChannelId := ChannelIds[chanIdx]
 		// Move to next channel (prepare next loop)
-		chanIdx = (chanIdx + 1) & len(ChannelIds)
+		chanIdx = (chanIdx + 1) % len(ChannelIds)
 
 		msgs := (*rBuffs)[cChannelId][readers[cChannelId]]
 		if msgs == nil {
