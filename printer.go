@@ -18,7 +18,6 @@ func PrintNetworkMonitor(pkts int, start *time.Time, action string) {
 		elapsed := time.Since(*start).Seconds()
 		pps := int(float64(pkts) / elapsed)
 
-		// TODO monitor mbps
 		log.Printf("Pkts %s: %d | PPS: %d", action, pkts, pps)
 	}
 }

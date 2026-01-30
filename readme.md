@@ -78,12 +78,8 @@ Monitoring e2e work (reception -> parsing -> sync):
 For updated pcapng captures and SBE classes, refer to [Deribit Dev Guide](https://support.deribit.com/hc/en-us/articles/29392445838877-Multicast-Developer-Guide)
 
 ### TODO explore further:
-- sort pkts:
-    - out-of-order
-    - network gaps (drops)
 - state interpretation:
     - mapping instrument_id : instrument_name
-- state repr + recovery (protobuf?)
 - snapshot + incremental replay
 - multiple channels - ip:port listen to different asset bases
 - perf:
@@ -104,4 +100,3 @@ Links
 - https://balodeamit.blogspot.com/2013/10/receive-side-scaling-and-receive-packet.html
 - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/network_troubleshooting_and_performance_tuning/tuning-network-adapter-settings
 - https://blog.packagecloud.io/monitoring-tuning-linux-networking-stack-receiving-data/
-

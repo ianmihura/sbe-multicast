@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -15,11 +16,11 @@ var coderPool = sync.Pool{
 	},
 }
 
-func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, start *time.Time, rcv *int32) {
+func ParseWorker(dataCh <-chan []byte, rBuffs *RingBuffers, start *time.Time, rcv *int32) {
 	var rcv_ int32
 	for data := range dataCh {
 		if *Mode == "ping" {
-			syncCh <- nil
+			continue
 
 		} else {
 			c := coderPool.Get().(*stdmsg.Coder)
@@ -33,6 +34,30 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, start *
 			frame := stdmsg.FrameHeader{}
 			frame.Decode(c)
 
+			index := frame.SequenceNumber % RingBufferSize
+			if (*rBuffs)[frame.ChannelId][index] != nil {
+				// repeated frame
+				fmt.Println("REPEATED FRAME:")
+				fmt.Println("\nOLD FRAME:")
+				(*(*rBuffs)[frame.ChannelId][index][0]).PPrint(0)
+
+				// TODO remove this, only for testing
+				header := stdmsg.MessageHeader{
+					SequenceNumber: frame.SequenceNumber,
+					ChannelId:      frame.ChannelId,
+				}
+				header.Decode(c)
+				fmt.Println("\nNEW FRAME:")
+				header.PPrint(0)
+
+				continue
+			}
+
+			// TODO make the above nil check and below assign atomic
+			// TODO size ok?
+			(*rBuffs)[frame.ChannelId][index] = make([]*stdmsg.StdMessage, 10)
+
+			msgs := (*rBuffs)[frame.ChannelId][index]
 			for uint16(c.GetOffset()) < frame.PacketLength {
 				header := stdmsg.MessageHeader{
 					SequenceNumber: frame.SequenceNumber,
@@ -45,7 +70,7 @@ func ParseWorker(dataCh <-chan []byte, syncCh chan<- *stdmsg.StdMessage, start *
 					log.Fatal(err)
 				}
 				msg.Decode(c)
-				syncCh <- &msg
+				msgs = append(msgs, &msg)
 			}
 
 			if IsM {

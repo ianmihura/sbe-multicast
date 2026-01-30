@@ -7,8 +7,6 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ianmihura/sbe-multicast/stdmsg"
-
 	"net/http"
 	"net/http/pprof"
 )
@@ -57,18 +55,17 @@ func main() {
 	dataCh := make(chan []byte, DATA_CHAN_CAP)
 	go ListenUDPFast(addr, dataCh, &start)
 
-	// `syncCh` will grab finished work of each worker
-	//   and send it to be executed in-line
-	syncCh := make(chan *stdmsg.StdMessage, SYNC_CHAN_CAP)
+	// parser and sync will share a map of RingBuffers
+	rBuffs := InitRingBuffers()
 
 	// We spinup n workers (as NumCPU)
 	rcv := int32(0) // track all rcv packets
 	for range nProc {
-		go ParseWorker(dataCh, syncCh, &start, &rcv)
+		go ParseWorker(dataCh, rBuffs, &start, &rcv)
 	}
 
 	// Sync up the work as we receive it
-	go SyncWorkers(syncCh, killCh)
+	go SyncWorkers(rBuffs, killCh)
 
 	// Send packets
 	if !IsLoop {
