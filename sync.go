@@ -30,8 +30,10 @@ func SyncWorkers(rBuffs *RingBuffers, killCh chan<- os.Signal) {
 
 		msgs := (*rBuffs)[cChannelId][readers[cChannelId]]
 		if msgs == nil {
-			if (*rBuffs)[cChannelId][readers[cChannelId]+LOOK_AHEAD] == nil {
-				fmt.Println("Found future packets")
+			// Gap Detection: If current is nil but future exists, skip current
+			futureIdx := (readers[cChannelId] + LOOK_AHEAD) & (RingBufferSize - 1)
+			if (*rBuffs)[cChannelId][futureIdx] != nil {
+				fmt.Printf("Gap detected on channel %d at seq %d, skipping...\n", cChannelId, readers[cChannelId])
 				readers[cChannelId] = (readers[cChannelId] + 1) & (RingBufferSize - 1)
 			}
 			continue
@@ -45,18 +47,15 @@ func SyncWorkers(rBuffs *RingBuffers, killCh chan<- os.Signal) {
 		if IsP {
 			fmt.Println()
 			for _, msg := range msgs {
-				(*msg).PPrint(0)
+				msg.PPrint(0)
 			}
 		}
 
 		if IsV {
 			for _, msg := range msgs {
-				s, ok := (*msg).(*stdmsg.PriceIndex)
+				s, ok := msg.(*stdmsg.PriceIndex)
 				if ok {
 					fmt.Println(s.Header.SequenceNumber, order)
-					// if s.Header.SequenceNumber != order {
-					// fmt.Println(s.Header.SequenceNumber, order)
-					// }
 					atomic.AddUint32(&order, 1)
 				}
 			}
@@ -76,14 +75,14 @@ func SyncWorkers(rBuffs *RingBuffers, killCh chan<- os.Signal) {
 // RingBuffers Usage:
 //   - RingBuffer[channelId][seqNum] == nil
 //   - RingBuffer[channelId][seqNum][messageIdx]
-type RingBuffers map[uint16][][]*stdmsg.StdMessage
+type RingBuffers map[uint16][][]stdmsg.StdMessage
 
 const RingBufferSize = _1KB / 8 // 128 = 1024/8 (8 byte size pointer, keep each RingBuff @1KB)
 
 func InitRingBuffers() *RingBuffers {
 	buffs := make(RingBuffers, len(ChannelIds))
 	for _, id := range ChannelIds {
-		buffs[id] = make([][]*stdmsg.StdMessage, RingBufferSize)
+		buffs[id] = make([]([]stdmsg.StdMessage), RingBufferSize)
 	}
 	return &buffs
 }

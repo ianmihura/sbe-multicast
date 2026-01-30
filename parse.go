@@ -39,7 +39,7 @@ func ParseWorker(dataCh <-chan []byte, rBuffs *RingBuffers, start *time.Time, rc
 				// repeated frame
 				fmt.Println("REPEATED FRAME:")
 				fmt.Println("\nOLD FRAME:")
-				(*(*rBuffs)[frame.ChannelId][index][0]).PPrint(0)
+				(*rBuffs)[frame.ChannelId][index][0].PPrint(0)
 
 				// TODO remove this, only for testing
 				header := stdmsg.MessageHeader{
@@ -53,11 +53,8 @@ func ParseWorker(dataCh <-chan []byte, rBuffs *RingBuffers, start *time.Time, rc
 				continue
 			}
 
-			// TODO make the above nil check and below assign atomic
-			// TODO size ok?
-			(*rBuffs)[frame.ChannelId][index] = make([]*stdmsg.StdMessage, 10)
-
-			msgs := (*rBuffs)[frame.ChannelId][index]
+			// Local accumulation to avoid sync worker seeing partial frames
+			msgs := make([]stdmsg.StdMessage, 0, 8)
 			for uint16(c.GetOffset()) < frame.PacketLength {
 				header := stdmsg.MessageHeader{
 					SequenceNumber: frame.SequenceNumber,
@@ -70,8 +67,11 @@ func ParseWorker(dataCh <-chan []byte, rBuffs *RingBuffers, start *time.Time, rc
 					log.Fatal(err)
 				}
 				msg.Decode(c)
-				msgs = append(msgs, &msg)
+				msgs = append(msgs, msg)
 			}
+
+			// Atomic-like assignment of the fully populated slice header.
+			(*rBuffs)[frame.ChannelId][index] = msgs
 
 			if IsM {
 				rcv_ = atomic.AddInt32(rcv, 1)
